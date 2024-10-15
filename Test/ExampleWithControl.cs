@@ -1,13 +1,15 @@
 ﻿using DevDash.Controls;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Test
 {
-    public partial class ExampleWithControl : FormBase
+    public partial class ExampleWithControl : Form
     {
         public ExampleWithControl()
         {
             InitializeComponent();
+            dataGridView1.DataSource = TestData.CreateTestData();
 
             //all that is done to get the datagridview to work with the grouping control, is adding the
             // DataGridViewGrouperControl and setting its DataGridView property to the grid
@@ -15,7 +17,7 @@ namespace Test
 
 
             //once the datagridview is set (in this case in the designer), the Grouper property can be used to set the grouping
-            var grouper = this.dataGridViewGrouperControl1.Grouper;
+            var grouper = dataGridViewGrouperControl1.Grouper;
             grouper.SetGroupOn("AString");
 
             //also valid:
@@ -29,7 +31,8 @@ namespace Test
             //grouper.Options.StartCollapsed = true;
 
             //to collapse all loaded rows: (the difference with setting the option above, is that after choosing a new grouping (or on a reload), the new groups would expand.
-            //grouper.CollapseAll();
+            grouper.ExpandAll();
+            grouper.CollapseAll();
 
             //if you don't want the (rowcount) to be shown in the headers:
             //grouper.Options.ShowCount = false;
@@ -49,9 +52,10 @@ namespace Test
 
 
         //optionally, you can customize the grouping display by subscribing to the DisplayGroup event
-        void grouper_DisplayGroup(object sender, GroupDisplayEventArgs e)
+        void Grouper_DisplayGroup(object sender, GroupDisplayEventArgs e)
         {
-            e.BackColor = (e.Group.GroupIndex % 2) == 0 ? Color.Orange : Color.LightBlue;
+            // e.BackColor = (e.Group.GroupIndex % 2) == 0 ? Color.Orange : Color.LightBlue;
+            e.BackColor = Color.LightSteelBlue;
             e.Header = "[" + e.Header + "], grp: " + e.Group.GroupIndex;
             e.DisplayValue = "Value is " + e.DisplayValue;
             e.Summary = "contains " + e.Group.Count + " rows";

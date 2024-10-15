@@ -46,34 +46,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExampleWithComponent.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ExampleWithComponent.Designer.cs">
-      <DependentUpon>ExampleWithComponent.cs</DependentUpon>
-    </Compile>
     <Compile Include="ExampleWithControl.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ExampleWithControl.Designer.cs">
       <DependentUpon>ExampleWithControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormBase.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormBase.Designer.cs">
-      <DependentUpon>FormBase.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ExampleWithComponent.resx">
-      <DependentUpon>ExampleWithComponent.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="TestData.cs" />
     <EmbeddedResource Include="ExampleWithControl.resx">
       <DependentUpon>ExampleWithControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormBase.resx">
-      <DependentUpon>FormBase.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
