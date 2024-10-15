@@ -34,11 +34,11 @@
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewGrouperControl1 = new DevDash.Controls.DataGridViewGrouperControl();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.dataGridViewGrouper1 = new DevDash.Controls.DataGridViewGrouper(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataGridViewTextBoxColumn1
@@ -71,21 +71,6 @@
             this.dataGridViewGrouperControl1.Size = new System.Drawing.Size(209, 20);
             this.dataGridViewGrouperControl1.TabIndex = 0;
             // 
-            // dataGridViewGrouper1
-            // 
-            this.dataGridViewGrouper1.DataGridView = this.dataGridView1;
-            this.dataGridViewGrouper1.Options = ((DevDash.Controls.GroupingOptions)(resources.GetObject("dataGridViewGrouper1.Options")));
-            this.dataGridViewGrouper1.DisplayGroup += new System.EventHandler<DevDash.Controls.GroupDisplayEventArgs>(this.Grouper_DisplayGroup);
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.dataGridViewGrouperControl1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(520, 100);
-            this.panel1.TabIndex = 0;
-            // 
             // dataGridView1
             // 
             this.dataGridView1.AllowUserToAddRows = false;
@@ -104,6 +89,21 @@
             this.dataGridView1.Size = new System.Drawing.Size(520, 289);
             this.dataGridView1.TabIndex = 1;
             // 
+            // dataGridViewGrouper1
+            // 
+            this.dataGridViewGrouper1.DataGridView = this.dataGridView1;
+            this.dataGridViewGrouper1.Options = ((DevDash.Controls.GroupingOptions)(resources.GetObject("dataGridViewGrouper1.Options")));
+            this.dataGridViewGrouper1.DisplayGroup += new System.EventHandler<DevDash.Controls.GroupDisplayEventArgs>(this.Grouper_DisplayGroup);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.dataGridViewGrouperControl1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(520, 100);
+            this.panel1.TabIndex = 0;
+            // 
             // ExampleWithControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -112,9 +112,11 @@
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.panel1);
             this.Name = "ExampleWithControl";
+            this.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.RightToLeftLayout = true;
             this.Text = "ExampleWithControl";
-            this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

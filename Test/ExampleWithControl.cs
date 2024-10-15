@@ -56,9 +56,12 @@ namespace Test
         {
             // e.BackColor = (e.Group.GroupIndex % 2) == 0 ? Color.Orange : Color.LightBlue;
             e.BackColor = Color.LightSteelBlue;
-            e.Header = "[" + e.Header + "], grp: " + e.Group.GroupIndex;
-            e.DisplayValue = "Value is " + e.DisplayValue;
-            e.Summary = "contains " + e.Group.Count + " rows";
+            //e.Header = "[" + e.Header + "], grp: " + e.Group.GroupIndex;
+            //e.DisplayValue = "Value is " + e.DisplayValue;
+            //e.Summary = "contains " + e.Group.Count + " rows";
+            e.Header = "تجريب 10";
+            e.DisplayValue = "القيمة";
+            e.Summary = "الملخص";
         }
     }
 }
