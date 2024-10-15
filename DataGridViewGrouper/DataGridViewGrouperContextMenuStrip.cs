@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace DevDash.Controls
 {
@@ -315,7 +314,7 @@ namespace DevDash.Controls
             res.Text = txt;
             res.Strip = this;
             OptionsMenuItem.DropDownItems.Add(res);
-            return res; 
+            return res;
         }
 
         void expand(object sender, EventArgs e)
@@ -418,7 +417,7 @@ namespace DevDash.Controls
 
         class booloption : ToolStripMenuItem
         {
-            
+
             public readonly GroupingOption Option;
             public booloption(GroupingOption Option)
             {

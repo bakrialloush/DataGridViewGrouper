@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
-using System.Text;
-using System.Windows.Forms;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace DevDash.Controls
 {
@@ -46,7 +45,7 @@ namespace DevDash.Controls
                 {
                     g.Rows.Clear();
                     //if (startcollapsed)g.SetCollapsed(true, false);
-                }                
+                }
             }
             List.Clear();
             if (newrows != null)
@@ -89,7 +88,7 @@ namespace DevDash.Controls
                         List.Add(g);
             }
             else
-                List.AddRange(allgroups);            
+                List.AddRange(allgroups);
 
             sort(Source.GroupSortOrder, false);
 
@@ -254,7 +253,7 @@ namespace DevDash.Controls
             }
             else
                 return newrows.Add(res);
-           
+
         }
 
         internal bool HasNewRow
@@ -297,7 +296,7 @@ namespace DevDash.Controls
             else if (i != -1)
             {
                 Rows.RemoveAt(i);
-                if(newrows.Count == 0)
+                if (newrows.Count == 0)
                     Source.FireBaseChanged(ListChangedType.ItemDeleted, i, true);
                 else
                 {
@@ -311,9 +310,9 @@ namespace DevDash.Controls
 
         NewRowsGroup newrows;
 
-        class NewRowsGroup:GroupRow
+        class NewRowsGroup : GroupRow
         {
-            public NewRowsGroup(GroupList list):base(list)
+            public NewRowsGroup(GroupList list) : base(list)
             {
 
             }
@@ -466,7 +465,7 @@ namespace DevDash.Controls
 
         public GroupDisplayEventArgs GetDisplayInfo(bool selected)
         {
-            GroupDisplayEventArgs e = new GroupDisplayEventArgs(this,Owner.Source.GroupOn);
+            GroupDisplayEventArgs e = new GroupDisplayEventArgs(this, Owner.Source.GroupOn);
             e.Selected = selected;
             SetDisplayInfo(e);
             if (e.Cancel) return null;
@@ -500,7 +499,7 @@ namespace DevDash.Controls
             if (delete)
             {
                 Owner.Rows.RemoveAt(Index);
-                Owner.List.RemoveAt(i);                
+                Owner.List.RemoveAt(i);
             }
             Owner.ReIndex(i);
             Owner.Source.FireBaseChanged(
@@ -509,7 +508,7 @@ namespace DevDash.Controls
 
         public virtual int Add(object rec)
         {
-            int i  = Owner.Rows.Add(rec);
+            int i = Owner.Rows.Add(rec);
             Owner.Source.FireBaseChanged(ListChangedType.ItemAdded, i, false);
             Rows.Add(rec);
             Owner.Source.FireBaseChanged(ListChangedType.ItemChanged, Index, false);

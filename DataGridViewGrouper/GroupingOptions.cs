@@ -1,16 +1,15 @@
-﻿using System;
+﻿using DevDash.IO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Windows.Forms;
-using System.Runtime.Serialization;
 using System.Linq;
-using DevDash.IO;
+using System.Runtime.Serialization;
+using System.Windows.Forms;
 
 namespace DevDash.Controls
 {
     [Serializable]
-    public partial class GroupingOptions : INotifyPropertyChanged ,IEquatable<GroupingOptions>
+    public partial class GroupingOptions : INotifyPropertyChanged, IEquatable<GroupingOptions>
     {
         public GroupingOptions()
         {
@@ -67,7 +66,7 @@ namespace DevDash.Controls
         public bool StartCollapsed
         {
             get { return GetValue<bool>(GroupingOption.StartCollapsed); }
-            set{SetValue(GroupingOption.StartCollapsed, value);}
+            set { SetValue(GroupingOption.StartCollapsed, value); }
         }
         bool ShouldSerializeStartCollapsed() { return ShouldSerialize(GroupingOption.StartCollapsed); }
 
@@ -136,8 +135,8 @@ namespace DevDash.Controls
 
         internal void NotifyChanged(GroupingOption o)
         {
-            if(OptionChanged != null)
-                OptionChanged(this,new GroupingOptionChangedEventArgs(o));
+            if (OptionChanged != null)
+                OptionChanged(this, new GroupingOptionChangedEventArgs(o));
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(o.ToString()));
         }
@@ -148,8 +147,8 @@ namespace DevDash.Controls
         [field: NonSerialized]
         public event EventHandler<GroupingOptionChangedEventArgs> OptionChanged;
 
-        
- 
+
+
 
         public bool Equals(GroupingOptions o)
         {
@@ -161,7 +160,7 @@ namespace DevDash.Controls
         }
     }
 
-    partial class GroupingOptions:ISerializable
+    partial class GroupingOptions : ISerializable
     {
         #region ISerializable Members
 
@@ -193,28 +192,28 @@ namespace DevDash.Controls
         #endregion
     }
 
-    partial class GroupingOptions:ICustomSerializer
+    partial class GroupingOptions : ICustomSerializer
     {
 
         #region ICustomSerializer Members
 
         bool ICustomSerializer.Serialize(SimpleObjectSerializer s)
         {
-            
+
             var vals = list.Where(g => !g.IsDefault).ToArray();
             s.Writer.Write((byte)vals.Length);
-            if (vals.Length  > 0)
+            if (vals.Length > 0)
                 foreach (var g in vals)
                 {
                     s.Writer.Write(g.Option.ToString());
-                    s.WriteSubValue(g.GetValue());                    
+                    s.WriteSubValue(g.GetValue());
                 }
             return true;
         }
 
         bool ICustomSerializer.Deserialize(SimpleObjectDeserializer ds)
         {
-            int cnt = ds.Reader.ReadByte();            
+            int cnt = ds.Reader.ReadByte();
             for (int i = 0; i < cnt; i++)
             {
                 var name = ds.Reader.ReadString();
@@ -243,7 +242,7 @@ namespace DevDash.Controls
         SelectRowsOnDoubleClick
     }
 
-    public class GroupingOptionChangedEventArgs:EventArgs
+    public class GroupingOptionChangedEventArgs : EventArgs
     {
         public readonly GroupingOption Option;
         public GroupingOptionChangedEventArgs(GroupingOption Option)
@@ -271,7 +270,7 @@ namespace DevDash.Controls
         public abstract object GetDefaultValue();
         public abstract void Reset();
         internal abstract void CopyValue(GroupingOptionValue o);
-        public abstract Type ValueType{get;}
+        public abstract Type ValueType { get; }
         public abstract void SetValue(object value);
 
         public abstract bool Equals(GroupingOptionValue v);
@@ -358,7 +357,7 @@ namespace DevDash.Controls
             Value = DefaultValue;
         }
 
-        
+
     }
 
     public static class EnumFunctions

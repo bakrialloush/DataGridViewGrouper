@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 namespace DevDash.Controls
@@ -101,7 +99,7 @@ namespace DevDash.Controls
         public DataGridView DataGridView
         {
             get
-            {                
+            {
                 if (grouper != null)
                     return grouper.DataGridView;
                 return null;

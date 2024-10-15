@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Test
@@ -37,7 +31,7 @@ namespace Test
                     {
                         AString = new string((char)('A' + rnd.Next(0, 25)), 8),
                         ADate = dt.AddDays(rnd.Next(-100, 100)),
-                        AnInt = rnd.Next(0,50)
+                        AnInt = rnd.Next(0, 50)
                     }
                     );
             };
@@ -45,7 +39,7 @@ namespace Test
         }
     }
 
-    public class TestData:INotifyPropertyChanged
+    public class TestData : INotifyPropertyChanged
     {
         string str;
         public string AString { get { return str; } set { str = value; NotifyChanged("AString"); } }
@@ -54,9 +48,10 @@ namespace Test
         int i;
         public int AnInt { get { return i; } set { i = value; NotifyChanged("AnInt"); } }
 
-        void NotifyChanged(string prop){
-            if(PropertyChanged!=null)
-                PropertyChanged(this,new PropertyChangedEventArgs(prop));
+        void NotifyChanged(string prop)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
         public event PropertyChangedEventHandler PropertyChanged;
     }

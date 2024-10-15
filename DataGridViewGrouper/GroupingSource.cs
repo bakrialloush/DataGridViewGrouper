@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Text;
 
 namespace DevDash.Controls
 {
     [DefaultEvent("GroupingChanged")]
-    public partial class GroupingSource : BindingSource,ICancelAddNew
+    public partial class GroupingSource : BindingSource, ICancelAddNew
     {
-        public GroupingSource()            
+        public GroupingSource()
         {
-            
+
         }
         public GroupingSource(object DataSource)
             : this()
@@ -48,7 +46,7 @@ namespace DevDash.Controls
             }
         }
 
-        void setgroupon(GroupingInfo value,bool forcetext)
+        void setgroupon(GroupingInfo value, bool forcetext)
         {
             info = null;
             if (forcetext && value.GroupValueType != typeof(string))
@@ -69,7 +67,7 @@ namespace DevDash.Controls
 
         public void RemoveGrouping()
         {
-            if (groupon == null ) return;
+            if (groupon == null) return;
             groupon = null;
             ResetGroups();
             OnGroupingChanged();
@@ -131,11 +129,12 @@ namespace DevDash.Controls
                 try
                 {
                     CurrentGroup = cur;
-                }catch{}
+                }
+                catch { }
         }
 
 
-        
+
         [DefaultValue(GroupingOptions.DefaultGroupSortOrder)]
         public SortOrder GroupSortOrder
         {
@@ -164,14 +163,14 @@ namespace DevDash.Controls
             {
                 if (options == value) return;
                 var cursort = GroupSortOrder;
-                if (options != null)                
+                if (options != null)
                 {
                     options.OptionChanged -= new EventHandler<GroupingOptionChangedEventArgs>(options_OptionChanged);
                     cursort = options.GroupSortOrder;
-                }                
+                }
                 options = value;
                 if (options != null)
-                {                    
+                {
                     options.OptionChanged += new EventHandler<GroupingOptionChangedEventArgs>(options_OptionChanged);
                 }
                 if (GroupSortOrder != cursort)
@@ -183,7 +182,7 @@ namespace DevDash.Controls
         {
 
             if (!shouldreset) return;
-            if (e.Option ==  GroupingOption.GroupSortOrder)
+            if (e.Option == GroupingOption.GroupSortOrder)
                 sort();
             else if (e.Option == GroupingOption.AlwaysGroupOnText)
             {
@@ -227,7 +226,7 @@ namespace DevDash.Controls
             if (GroupSortOrder == SortOrder.None)
                 reset(false);
             else
-                info.Sort();  
+                info.Sort();
         }
 
 
@@ -243,7 +242,7 @@ namespace DevDash.Controls
             {
                 if (value == null)
                     throw new ArgumentNullException();
-                Position = value.Index;                
+                Position = value.Index;
                 if (!value.Collapsed)
                 {
                     Position++;
@@ -477,8 +476,8 @@ namespace DevDash.Controls
         }
 
         protected override void OnDataSourceChanged(EventArgs e)
-        {            
-            UnwireCurMan();            
+        {
+            UnwireCurMan();
             ResetGroups();
             var ds = DataSource;
             if (ds is ICurrencyManagerProvider)
@@ -510,8 +509,8 @@ namespace DevDash.Controls
                     case ListChangedType.ItemChanged:
                         if (groupon.IsProperty(e.PropertyDescriptor) && !info.Groups.IsNewRow(e.NewIndex))
                             reset(true);
-                        else    
-                            FireBaseChanged(new ListChangedEventArgs( ListChangedType.ItemChanged,
+                        else
+                            FireBaseChanged(new ListChangedEventArgs(ListChangedType.ItemChanged,
                                 IndexOf(List[e.NewIndex]),
                                 e.PropertyDescriptor),
                                 false);
@@ -520,7 +519,7 @@ namespace DevDash.Controls
                         if (info.Groups.HasNewRow)
                             info.Groups.AddNew(List[e.NewIndex], true);
                         else
-                            reset(true);                    
+                            reset(true);
                         return;
                     case ListChangedType.ItemDeleted:
                         reset(true);
@@ -561,7 +560,7 @@ namespace DevDash.Controls
             try
             {
                 res = base.AddNew();
-                newrow  =info.Groups.AddNew(res,false);
+                newrow = info.Groups.AddNew(res, false);
             }
             finally
             {
@@ -572,10 +571,10 @@ namespace DevDash.Controls
             return res;
         }
 
-       
 
-  
-        
+
+
+
         public override void ApplySort(PropertyDescriptor property, ListSortDirection sort)
         {
             if (property is PropertyWrapper)
@@ -646,7 +645,7 @@ namespace DevDash.Controls
                 suspendlistchange++;
                 try
                 {
-                    int  li = List.IndexOf(this[pos]);                    
+                    int li = List.IndexOf(this[pos]);
                     list.CancelNew(li);
                 }
                 finally { suspendlistchange--; }
@@ -711,7 +710,7 @@ namespace DevDash.Controls
                     Position = IndexOf(cm.Current);
             }
             finally { suspendsync = false; }
-            
+
         }
 
         public override int IndexOf(object value)
@@ -750,7 +749,7 @@ namespace DevDash.Controls
             base.Insert(index, value);
         }
 
-        
+
 
         public partial class PropertyWrapper : PropertyDescriptor
         {

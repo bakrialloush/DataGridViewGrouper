@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using DevDash.Controls;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DevDash.Controls;
 
 namespace Test
 {
@@ -21,7 +13,7 @@ namespace Test
             // DataGridViewGrouperControl and setting its DataGridView property to the grid
             // the grouper control can reuse existing DataGridViewGrouper components or creates its own (as is done here)
 
-            
+
             //once the datagridview is set (in this case in the designer), the Grouper property can be used to set the grouping
             var grouper = this.dataGridViewGrouperControl1.Grouper;
             grouper.SetGroupOn("AString");
