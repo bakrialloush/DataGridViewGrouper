@@ -1,5 +1,7 @@
 ﻿using DevDash.Controls;
+using System;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Test
@@ -11,6 +13,7 @@ namespace Test
         public ExampleWithControl()
         {
             InitializeComponent();
+            EnableDoubleBuffer(dataGridView1);
             dataGridView1.DataSource = TestData.CreateTestData();
 
             _grouper = new DevDash.Controls.DataGridViewGrouper(dataGridView1);
@@ -41,6 +44,26 @@ namespace Test
             //e.DisplayValue = "Value is " + e.DisplayValue;
             //e.Summary = "contains " + e.Group.Count + " rows";
             e.Header = "تجريب نص طويل لتحديد عرض العنوان في هذا المكان";
+        }
+
+        private void BtnExpand_Click(object sender, EventArgs e)
+        {
+            _grouper.ExpandAll();
+        }
+
+        private void BtnCollapse_Click(object sender, EventArgs e)
+        {
+            _grouper.CollapseAll();
+        }
+
+        private static void EnableDoubleBuffer(Control control)
+        {
+            if (!SystemInformation.TerminalServerSession)
+            {
+                Type type = control.GetType();
+                PropertyInfo? pi = type.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+                pi?.SetValue(control, true, null);
+            }
         }
     }
 }
