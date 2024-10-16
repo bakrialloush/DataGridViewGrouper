@@ -12,77 +12,65 @@ namespace DevDash.Controls
     [DefaultEvent("DisplayGroup")]
     public partial class DataGridViewGrouper : Component
     {
-        private DataGridView grid;
-        private bool selectionset;
-        private readonly GroupingSource source = new GroupingSource();
-        private Point capturedCollapseBox = new Point(-1, -1);
+        private DataGridView _grid;
+        private bool _selectionSet;
+        private Point _capturedCollapseBox = new Point(-1, -1);
+        private readonly GroupingSource _source = new GroupingSource();
+        private readonly List<int> _selectedGroups = new List<int>();
 
         public event EventHandler PropertiesChanged;
 
         public DataGridViewGrouper()
         {
-            source.DataSourceChanged += new EventHandler(source_DataSourceChanged);
-            source.Grouper = this;
+            _source.DataSourceChanged += new EventHandler(Source_DataSourceChanged);
+            _source.Grouper = this;
         }
 
-        public DataGridViewGrouper(DataGridView Grid) : this()
-        {
-            DataGridView = Grid;
-        }
-
-        public DataGridViewGrouper(IContainer Container) : this()
-        {
-            Container.Add(this);
-        }
+        public DataGridViewGrouper(DataGridView grid) : this() => DataGridView = grid;
 
         [DefaultValue(null)]
         public DataGridView DataGridView
         {
-            get { return grid; }
+            get => _grid;
             set
             {
-                if (grid == value) return;
-                if (grid != null)
+                if (_grid == value) return;
+                if (_grid != null)
                 {
-                    grid.RowPrePaint -= new DataGridViewRowPrePaintEventHandler(grid_RowPrePaint);
-                    grid.CellBeginEdit -= new DataGridViewCellCancelEventHandler(grid_CellBeginEdit);
-                    grid.CellClick -= new DataGridViewCellEventHandler(grid_CellClick);
-                    grid.MouseMove -= new MouseEventHandler(grid_MouseMove);
-                    grid.SelectionChanged -= new EventHandler(grid_SelectionChanged);
-                    grid.DataSourceChanged -= new EventHandler(grid_DataSourceChanged);
-                    grid.AllowUserToAddRowsChanged -= new EventHandler(grid_AllowUserToAddRowsChanged);
+                    _grid.RowPrePaint -= new DataGridViewRowPrePaintEventHandler(Grid_RowPrePaint);
+                    _grid.CellBeginEdit -= new DataGridViewCellCancelEventHandler(Grid_CellBeginEdit);
+                    _grid.CellClick -= new DataGridViewCellEventHandler(Grid_CellClick);
+                    _grid.MouseMove -= new MouseEventHandler(Grid_MouseMove);
+                    _grid.SelectionChanged -= new EventHandler(Grid_SelectionChanged);
+                    _grid.DataSourceChanged -= new EventHandler(Grid_DataSourceChanged);
+                    _grid.AllowUserToAddRowsChanged -= new EventHandler(Grid_AllowUserToAddRowsChanged);
                 }
                 RemoveGrouping();
-                selectedGroups.Clear();
-                grid = value;
-                if (grid != null)
+                _selectedGroups.Clear();
+                _grid = value;
+                if (_grid != null)
                 {
-                    grid.RowPrePaint += new DataGridViewRowPrePaintEventHandler(grid_RowPrePaint);
-                    grid.CellBeginEdit += new DataGridViewCellCancelEventHandler(grid_CellBeginEdit);
-                    grid.CellClick += new DataGridViewCellEventHandler(grid_CellClick);
-                    grid.MouseMove += new MouseEventHandler(grid_MouseMove);
-                    grid.SelectionChanged += new EventHandler(grid_SelectionChanged);
-                    grid.DataSourceChanged += new EventHandler(grid_DataSourceChanged);
-                    grid.AllowUserToAddRowsChanged += new EventHandler(grid_AllowUserToAddRowsChanged);
+                    _grid.RowPrePaint += new DataGridViewRowPrePaintEventHandler(Grid_RowPrePaint);
+                    _grid.CellBeginEdit += new DataGridViewCellCancelEventHandler(Grid_CellBeginEdit);
+                    _grid.CellClick += new DataGridViewCellEventHandler(Grid_CellClick);
+                    _grid.MouseMove += new MouseEventHandler(Grid_MouseMove);
+                    _grid.SelectionChanged += new EventHandler(Grid_SelectionChanged);
+                    _grid.DataSourceChanged += new EventHandler(Grid_DataSourceChanged);
+                    _grid.AllowUserToAddRowsChanged += new EventHandler(Grid_AllowUserToAddRowsChanged);
                 }
             }
         }
 
-        void grid_AllowUserToAddRowsChanged(object sender, EventArgs e)
-        {
-            source.CheckNewRow();
-        }
+        void Grid_AllowUserToAddRowsChanged(object sender, EventArgs e) => _source.CheckNewRow();
 
         #region Select/Collapse/Expand
-        void grid_MouseMove(object sender, MouseEventArgs e)
+        void Grid_MouseMove(object sender, MouseEventArgs e)
         {
-            //if (e.X < HeaderOffset && e.X >= HeaderOffset - CollapseBoxWidth)
             {
-                DataGridView.HitTestInfo ht = grid.HitTest(e.X, e.Y);
+                DataGridView.HitTestInfo ht = _grid.HitTest(e.X, e.Y);
                 if (IsGroupRow(ht.RowIndex))
                 {
                     var y = e.Y - ht.RowY;
-                    // if (y >= CollapseBox_Y_Offset && y <= CollapseBox_Y_Offset + CollapseBoxWidth)
                     {
                         CheckCollapsedFocused(ht.ColumnIndex, ht.RowIndex);
                         return;
@@ -94,93 +82,77 @@ namespace DevDash.Controls
 
         void InvalidateCapturedBox()
         {
-            if (capturedCollapseBox.Y == -1) return;
+            if (_capturedCollapseBox.Y == -1) return;
             try
             {
-                grid.InvalidateCell(capturedCollapseBox.X, capturedCollapseBox.Y);
+                _grid.InvalidateCell(_capturedCollapseBox.X, _capturedCollapseBox.Y);
             }
             catch
             {
-                capturedCollapseBox = new Point(-1, -1);
+                _capturedCollapseBox = new Point(-1, -1);
             }
         }
 
         void CheckCollapsedFocused(int col, int row)
         {
-            if (capturedCollapseBox.X != col || capturedCollapseBox.Y != row)
+            if (_capturedCollapseBox.X != col || _capturedCollapseBox.Y != row)
             {
                 InvalidateCapturedBox();
-                capturedCollapseBox = new Point(col, row);
+                _capturedCollapseBox = new Point(col, row);
                 InvalidateCapturedBox();
             }
         }
 
-        void grid_CellClick(object sender, DataGridViewCellEventArgs e)
+        void Grid_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex == -1) return;
-            if (e.RowIndex == capturedCollapseBox.Y)
+            if (e.RowIndex != -1 && e.RowIndex == _capturedCollapseBox.Y)
             {
                 var groupRow = GetGroupRow(e.RowIndex);
                 groupRow.Collapsed = !groupRow.Collapsed;
             }
         }
 
-        /// <summary>
-        /// selected group rows are kept seperately in order to invalidate the entire row
-        /// and not just one cell when the selection is changed
-        /// </summary>
-        List<int> selectedGroups = new List<int>();
-        void grid_SelectionChanged(object sender, EventArgs e)
+        void Grid_SelectionChanged(object sender, EventArgs e)
         {
-            if (selectionset)
+            if (_selectionSet)
             {
-                selectionset = false;
+                _selectionSet = false;
                 InvalidateSelected();
             }
         }
 
         void SetSelection()
         {
-            // InvalidateSelected();
-            selectionset = true;
-            selectedGroups.Clear();
-            foreach (DataGridViewCell c in grid.SelectedCells)
+            _selectionSet = true;
+            _selectedGroups.Clear();
+            foreach (DataGridViewCell c in _grid.SelectedCells)
                 if (IsGroupRow(c.RowIndex))
-                    if (!selectedGroups.Contains(c.RowIndex))
-                        selectedGroups.Add(c.RowIndex);
+                    if (!_selectedGroups.Contains(c.RowIndex))
+                        _selectedGroups.Add(c.RowIndex);
             InvalidateSelected();
         }
 
         void InvalidateSelected()
         {
-            if (selectedGroups.Count == 0 || grid.SelectionMode == DataGridViewSelectionMode.FullRowSelect) return;
-            int count = grid.Rows.Count;
-            foreach (int i in selectedGroups)
+            if (_selectedGroups.Count == 0 || _grid.SelectionMode == DataGridViewSelectionMode.FullRowSelect) return;
+            int count = _grid.Rows.Count;
+            foreach (int i in _selectedGroups)
                 if (i < count)
-                    grid.InvalidateRow(i);
+                    _grid.InvalidateRow(i);
         }
 
-        public void ExpandAll()
-        {
-            source.CollapseExpandAll(false);
-        }
+        public void ExpandAll() => _source.CollapseExpandAll(false);
 
-        public void CollapseAll()
-        {
-            source.CollapseExpandAll(true);
-        }
+        public void CollapseAll() => _source.CollapseExpandAll(true);
 
-        GroupRow GetGroupRow(int RowIndex)
-        {
-            return (GroupRow)source.Groups.Rows[RowIndex];
-        }
+        GroupRow GetGroupRow(int RowIndex) => (GroupRow)_source.Groups.Rows[RowIndex];
 
         IEnumerable<DataGridViewRow> GetRows(int index)
         {
             var gr = GetGroupRow(index);
             for (int i = 0; i < gr.Count; i++)
             {
-                yield return grid.Rows[++index];
+                yield return _grid.Rows[++index];
             }
         }
 
@@ -196,32 +168,26 @@ namespace DevDash.Controls
         {
             get
             {
-                return source.Groups;
+                return _source.Groups;
             }
         }
 
         public bool IsGroupRow(int RowIndex)
         {
-            return source.IsGroupRow(RowIndex);
-        }
-        void source_DataSourceChanged(object sender, EventArgs e)
-        {
-            OnPropertiesChanged();
+            return _source.IsGroupRow(RowIndex);
         }
 
-        void OnPropertiesChanged()
-        {
-            if (PropertiesChanged != null)
-                PropertiesChanged(this, EventArgs.Empty);
-        }
+        void Source_DataSourceChanged(object sender, EventArgs e) => OnPropertiesChanged();
+
+        void OnPropertiesChanged() => PropertiesChanged?.Invoke(this, EventArgs.Empty);
 
         public IEnumerable<PropertyDescriptor> GetProperties()
         {
-            foreach (PropertyDescriptor pd in source.GetItemProperties(null))
+            foreach (PropertyDescriptor pd in _source.GetItemProperties(null))
                 yield return pd;
         }
 
-        void grid_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        void Grid_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             if (IsGroupRow(e.RowIndex))
                 e.Cancel = true;
@@ -230,35 +196,23 @@ namespace DevDash.Controls
         protected override void Dispose(bool disposing)
         {
             DataGridView = null;
-            source.Dispose();
+            _source.Dispose();
             base.Dispose(disposing);
         }
 
-        /*
-        void grid_Sorted(object sender, EventArgs e)
-        {
-            ResetGrouping();
-        }*/
+        public GroupingSource GroupingSource => _source;
 
-        public GroupingSource GroupingSource
-        {
-            get
-            {
-                return source;
-            }
-        }
-
-        void grid_DataSourceChanged(object sender, EventArgs e)
+        void Grid_DataSourceChanged(object sender, EventArgs e)
         {
             if (!GridUsesGroupSource)
             {
                 try
                 {
-                    source.DataSource = grid.DataSource;
+                    _source.DataSource = _grid.DataSource;
                 }
                 catch
                 {
-                    source.RemoveGrouping();
+                    _source.RemoveGrouping();
                 }
             }
         }
@@ -268,9 +222,9 @@ namespace DevDash.Controls
             if (GridUsesGroupSource)
                 try
                 {
-                    grid.DataSource = source.DataSource;
-                    grid.DataMember = source.DataMember;
-                    source.RemoveGrouping();
+                    _grid.DataSource = _source.DataSource;
+                    _grid.DataMember = _source.DataMember;
+                    _source.RemoveGrouping();
                     return true;
                 }
                 catch { }
@@ -279,23 +233,23 @@ namespace DevDash.Controls
 
         public event EventHandler GroupingChanged
         {
-            add { source.GroupingChanged += value; }
-            remove { source.GroupingChanged -= value; }
+            add { _source.GroupingChanged += value; }
+            remove { _source.GroupingChanged -= value; }
         }
 
         bool GridUsesGroupSource
         {
             get
             {
-                return grid != null && grid.DataSource == source;
+                return _grid != null && _grid.DataSource == _source;
             }
         }
 
         public void ResetGrouping()
         {
             if (!GridUsesGroupSource) return;
-            capturedCollapseBox = new Point(-1, -1);
-            source.ResetGroups();
+            _capturedCollapseBox = new Point(-1, -1);
+            _source.ResetGroups();
         }
 
         [DefaultValue(null)]
@@ -303,7 +257,7 @@ namespace DevDash.Controls
         {
             get
             {
-                return source.GroupOn;
+                return _source.GroupOn;
             }
             set
             {
@@ -328,15 +282,15 @@ namespace DevDash.Controls
         /// <returns></returns>
         GroupingSource CheckSource()
         {
-            if (grid == null)
+            if (_grid == null)
                 throw new Exception("No target datagridview set");
             if (!GridUsesGroupSource)
             {
-                source.DataSource = grid.DataSource;
-                source.DataMember = grid.DataMember;
-                grid.DataSource = source;
+                _source.DataSource = _grid.DataSource;
+                _source.DataMember = _grid.DataMember;
+                _grid.DataSource = _source;
             }
-            return source;
+            return _source;
         }
 
         #region Painting
@@ -344,17 +298,17 @@ namespace DevDash.Controls
         private const int CollapseBoxWidth = 10;
         private const int LineOffset = CollapseBoxWidth / 2;
         private const int CollapseBox_Y_Offset = 5;
-        private readonly Pen LinePen = Pens.SteelBlue;
+        private readonly Pen _linePen = Pens.SteelBlue;
 
-        int HeaderOffset => grid.RowHeadersVisible ? grid.RowHeadersWidth / 2 + CollapseBoxWidth / 2 : LineOffset * 4;
+        int HeaderOffset => _grid.RowHeadersVisible ? _grid.RowHeadersWidth / 2 + CollapseBoxWidth / 2 : LineOffset * 4;
 
-        int DirectionOffsset => grid.RightToLeft == RightToLeft.Yes ? grid.Width - grid.RowHeadersWidth : 0;
+        int DirectionOffsset => _grid.RightToLeft == RightToLeft.Yes ? _grid.Width - _grid.RowHeadersWidth : 0;
 
-        int TitleOffset => grid.RightToLeft == RightToLeft.Yes ? grid.Width - HeaderOffset * 4 : HeaderOffset * 2;
+        int TitleOffset => _grid.RightToLeft == RightToLeft.Yes ? _grid.Width - HeaderOffset * 4 : HeaderOffset * 2;
 
-        bool DrawExpandCollapseLines => grid.RowHeadersVisible;
+        bool DrawExpandCollapseLines => _grid.RowHeadersVisible;
 
-        void grid_RowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
+        void Grid_RowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
         {
             if (IsGroupRow(e.RowIndex))
             {
@@ -368,26 +322,26 @@ namespace DevDash.Controls
         /// </summary>
         public event EventHandler<GroupDisplayEventArgs> DisplayGroup
         {
-            add { source.DisplayGroup += value; }
-            remove { source.DisplayGroup -= value; }
+            add { _source.DisplayGroup += value; }
+            remove { _source.DisplayGroup -= value; }
         }
 
         public DataGridViewGrouper this[int GroupIndex]
         {
             get
             {
-                return (DataGridViewGrouper)source[GroupIndex];
+                return (DataGridViewGrouper)_source[GroupIndex];
             }
         }
 
         void PaintGroupRow(DataGridViewRowPrePaintEventArgs e)
         {
-            GroupRow groupRow = (GroupRow)source[e.RowIndex];
-            if (!selectionset)
+            GroupRow groupRow = (GroupRow)_source[e.RowIndex];
+            if (!_selectionSet)
             {
                 SetSelection();
             }
-            var info = groupRow.GetDisplayInfo(selectedGroups.Contains(e.RowIndex));
+            var info = groupRow.GetDisplayInfo(_selectedGroups.Contains(e.RowIndex));
             if (info == null || info.Cancel) return; //cancelled
             if (info.Font == null)
                 info.Font = e.InheritedRowStyle.Font;
@@ -399,7 +353,7 @@ namespace DevDash.Controls
                 e.Graphics.DrawLine(Pens.SteelBlue, rowBounds.Left, rowBounds.Bottom, rowBounds.Right, rowBounds.Bottom);
                 //group value
                 {
-                    rowBounds.X = TitleOffset - grid.HorizontalScrollingOffset;
+                    rowBounds.X = TitleOffset - _grid.HorizontalScrollingOffset;
                     //clear background
                     e.Graphics.FillRectangle(bgb, rowBounds);
                     using (var brush = new SolidBrush(info.ForeColor))
@@ -423,23 +377,21 @@ namespace DevDash.Controls
             //collapse/expand symbol               
             {
                 var circle = GetCollapseBoxBounds(DirectionOffsset, e.RowBounds.Y);
-                //if (capturedCollapseBox.Y == e.RowIndex)
-                //    e.Graphics.FillEllipse(Brushes.Yellow, circle);
-                e.Graphics.DrawEllipse(LinePen, circle);
+                e.Graphics.DrawEllipse(_linePen, circle);
                 bool collapsed = groupRow.Collapsed;
                 int cx;
                 if (DrawExpandCollapseLines && !collapsed)
                 {
                     cx = HeaderOffset - LineOffset;
-                    e.Graphics.DrawLine(LinePen, cx, circle.Bottom, cx, circle.Bottom);
+                    e.Graphics.DrawLine(_linePen, cx, circle.Bottom, cx, circle.Bottom);
                 }
                 circle.Inflate(-2, -2);
                 var cy = circle.Y + circle.Height / 2;
-                e.Graphics.DrawLine(LinePen, circle.X, cy, circle.Right, cy);
+                e.Graphics.DrawLine(_linePen, circle.X, cy, circle.Right, cy);
                 if (collapsed)
                 {
                     cx = circle.X + circle.Width / 2;
-                    e.Graphics.DrawLine(LinePen, cx, circle.Top, cx, circle.Bottom);
+                    e.Graphics.DrawLine(_linePen, cx, circle.Top, cx, circle.Bottom);
                 }
             }
         }
