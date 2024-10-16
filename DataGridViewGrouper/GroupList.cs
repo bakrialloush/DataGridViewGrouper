@@ -321,7 +321,6 @@ namespace DevDash.Controls
             {
                 base.SetDisplayInfo(e);
                 e.Header = "New Rows";
-                e.DisplayValue = null;
             }
 
             protected override bool AllowRemove
@@ -484,11 +483,8 @@ namespace DevDash.Controls
             }
 
             var o = Owner.Source.Options;
-            if (o.ShowCount)
-                e.Summary = "(" + Count + ")";
             if (o.ShowGroupName)
                 e.Header = e.GroupingInfo.ToString();
-            e.GroupingInfo.SetDisplayValues(e);
         }
 
         public virtual void Remove(object rec)

@@ -28,12 +28,6 @@ namespace DevDash.Controls
         {
             get { return typeof(object); }
         }
-
-        public virtual void SetDisplayValues(GroupDisplayEventArgs e)
-        {
-            var o = e.Value;
-            e.DisplayValue = o == null ? "<Null>" : o.ToString();
-        }
     }
 
     /// <summary>
@@ -268,36 +262,6 @@ namespace DevDash.Controls
             if (set(DateTimeGrouping.Day))
                 i += dt.Day;
             return i;
-        }
-
-        public override void SetDisplayValues(GroupDisplayEventArgs e)
-        {
-            base.SetDisplayValues(e);
-            if (Mode == DateTimeGrouping.Date)
-                e.DisplayValue = ((DateTime)e.Value).ToShortDateString();
-            else if (e.Value is int)
-            {
-                int i = (int)e.Value;
-                string value = null;
-                if (set(DateTimeGrouping.Year))
-                    value = "Year: " + i / 10000;
-                if (set(DateTimeGrouping.Month))
-                {
-                    if (value != null) value += ", ";
-                    int m = (i / 100) % 100;
-                    value += System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(m);
-                }
-                if (set(DateTimeGrouping.Day) || set(DateTimeGrouping.WeekDay))
-                {
-                    if (value != null) value += ", ";
-                    int d = i % 10000;
-                    value += set(DateTimeGrouping.WeekDay)
-                        ? System.Globalization.DateTimeFormatInfo.CurrentInfo.GetDayName((DayOfWeek)d)
-                        : "Day: " + d;
-
-                }
-                e.DisplayValue = value;
-            }
         }
     }
 

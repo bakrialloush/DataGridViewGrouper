@@ -63,8 +63,6 @@ namespace Test
             //e.DisplayValue = "Value is " + e.DisplayValue;
             //e.Summary = "contains " + e.Group.Count + " rows";
             e.Header = "تجريب 10";
-            e.DisplayValue = "القيمة";
-            e.Summary = "الملخص";
         }
     }
 }

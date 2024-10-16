@@ -481,19 +481,6 @@ namespace DevDash.Controls
                             e.Graphics.DrawString(info.Header, info.Font, brush, rowBounds, format);
                             rowBounds.X -= 25;// (int)size.Width - 5;
                         }
-                        if (info.DisplayValue != null)
-                        {
-                            using (var font = new Font(info.Font.FontFamily, info.Font.Size + 2, FontStyle.Bold))
-                            {
-                                var size = e.Graphics.MeasureString(info.DisplayValue, font);
-                                e.Graphics.DrawString(info.DisplayValue, font, brush, rowBounds, format);
-                                rowBounds.X -= 25; // (int)size.Width - 10;
-                            }
-                        }
-                        if (info.Summary != null)
-                        {
-                            e.Graphics.DrawString(info.Summary, info.Font, brush, rowBounds, format);
-                        }
                     }
                     e.Graphics.FillRectangle(bgb, 0, rowBounds.Top, TitleOffset, rowBounds.Height);
                 }
@@ -578,20 +565,9 @@ namespace DevDash.Controls
         public object Value { get { return Group.Value; } }
 
         /// <summary>
-        /// Gets or sets the value being displayed (after header)
-        /// </summary>
-        public string DisplayValue { get; set; }
-
-        /// <summary>
         /// The header normally contains the property/grouper name, it can be changed here
         /// </summary>
         public string Header { get; set; }
-
-        /// <summary>
-        /// The summary is the smaller value displayed between () after the <see cref="DisplayValue"/>. 
-        /// With default settings this contains the rowcount
-        /// </summary>
-        public string Summary { get; set; }
 
         public Color BackColor { get; set; }
 
@@ -603,13 +579,6 @@ namespace DevDash.Controls
         /// Indicates if the row begin displayed is currently selected
         /// </summary>
         public bool Selected { get; internal set; }
-
-        public override string ToString()
-        {
-            if (Summary == null)
-                return DisplayValue;
-            return string.Format("{0}   {1}", DisplayValue, Summary);
-        }
 
         /// <summary>
         /// Same as <see cref="Group"/>. Added for backward compatibility
