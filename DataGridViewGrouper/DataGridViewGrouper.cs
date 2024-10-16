@@ -70,11 +70,8 @@ namespace DevDash.Controls
                 DataGridView.HitTestInfo ht = _grid.HitTest(e.X, e.Y);
                 if (IsGroupRow(ht.RowIndex))
                 {
-                    var y = e.Y - ht.RowY;
-                    {
-                        CheckCollapsedFocused(ht.ColumnIndex, ht.RowIndex);
-                        return;
-                    }
+                    CheckCollapsedFocused(ht.ColumnIndex, ht.RowIndex);
+                    return;
                 }
             }
             CheckCollapsedFocused(-1, -1);
@@ -156,7 +153,7 @@ namespace DevDash.Controls
             }
         }
 
-        void SelectGroup(int offset)
+        private void SelectGroup(int offset)
         {
             foreach (DataGridViewRow row in GetRows(offset))
                 row.Selected = true;
@@ -324,14 +321,6 @@ namespace DevDash.Controls
         {
             add { _source.DisplayGroup += value; }
             remove { _source.DisplayGroup -= value; }
-        }
-
-        public DataGridViewGrouper this[int GroupIndex]
-        {
-            get
-            {
-                return (DataGridViewGrouper)_source[GroupIndex];
-            }
         }
 
         void PaintGroupRow(DataGridViewRowPrePaintEventArgs e)

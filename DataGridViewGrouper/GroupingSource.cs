@@ -8,67 +8,53 @@ namespace DevDash.Controls
     [DefaultEvent("GroupingChanged")]
     public partial class GroupingSource : BindingSource, ICancelAddNew
     {
-        public GroupingSource()
-        {
+        private CurrencyManager _currencyManager;
+        private GroupingInfo _groupOn;
+        private GroupInfo _info;
+        private PropertyDescriptorCollection _props;
+        private bool _resetting;
+        private readonly int _suspendListChange = 0;
+        private bool _suspendSync;
+        internal DataGridViewGrouper Grouper;
 
-        }
-        public GroupingSource(object DataSource)
-            : this()
-        {
-            this.DataSource = DataSource;
-        }
-
-        public GroupingSource(object DataSource, string GroupOn)
-            : this(DataSource)
-        {
-        }
-
-        GroupingInfo groupon;
 
         [DefaultValue(null)]
         public GroupingInfo GroupOn
         {
             get
             {
-                return groupon;
+                return _groupOn;
             }
             set
             {
-                if (groupon == value) return;
+                if (_groupOn == value) return;
 
                 if (value == null)
                     RemoveGrouping();
                 else
                 {
-                    if (value.Equals(groupon)) return;
-                    setgroupon(value);
+                    if (value.Equals(_groupOn)) return;
+                    SetGroupOn(value);
                 }
             }
         }
 
-        void setgroupon(GroupingInfo value)
+        void SetGroupOn(GroupingInfo value)
         {
-            info = null;
+            _info = null;
             if (value.GroupValueType != typeof(string))
             {
                 value = new StringGroupWrapper(value);
             }
-            groupon = value;
+            _groupOn = value;
             OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
             OnGroupingChanged();
         }
 
-        public bool IsGrouped
-        {
-            get { return groupon != null; }
-        }
-
-        internal DataGridViewGrouper Grouper;
-
         public void RemoveGrouping()
         {
-            if (groupon == null) return;
-            groupon = null;
+            if (_groupOn == null) return;
+            _groupOn = null;
             ResetGroups();
             OnGroupingChanged();
         }
@@ -80,16 +66,14 @@ namespace DevDash.Controls
 
         public PropertyDescriptor GetProperty(string Name)
         {
-            var pd = this.GetItemProperties(null)[Name];
-            if (pd == null)
-                throw new Exception(Name + " is not a valid property");
-            return pd;
+            PropertyDescriptor descriptor = GetItemProperties(null)[Name];
+            return descriptor ?? throw new Exception(Name + " is not a valid property");
         }
 
         public bool SetGroupOn(PropertyDescriptor p)
         {
             if (p == null) throw new ArgumentNullException();
-            if (groupon == null || !groupon.IsProperty(p))
+            if (_groupOn == null || !_groupOn.IsProperty(p))
             {
                 GroupOn = new PropertyGrouper(p);
                 return true;
@@ -97,26 +81,11 @@ namespace DevDash.Controls
             return false;
         }
 
-        public void SetCustomGroup<T>(Func<T, object> GroupValueProvider, string Description = null)
-        {
-            if (GroupValueProvider == null) throw new ArgumentNullException();
-            GroupOn = new DelegateGrouper<T>(GroupValueProvider, Description);
-        }
-
-        public void SetGroupOnStartLetters(GroupingInfo g, int Letters)
-        {
-            GroupOn = new StartLetterGrouper(g, Letters);
-        }
-        public void SetGroupOnStartLetters(string Property, int Letters)
-        {
-            SetGroupOnStartLetters(GetProperty(Property), Letters);
-        }
-
         public bool IsGroupRow(int Index)
         {
-            if (info == null) return false;
+            if (_info == null) return false;
             if (Index < 0 || Index >= Count) return false;
-            return info.Rows[Index] is GroupRow;
+            return _info.Rows[Index] is GroupRow;
         }
 
         public void CollapseExpandAll(bool collapse)
@@ -130,11 +99,6 @@ namespace DevDash.Controls
                     CurrentGroup = cur;
                 }
                 catch { }
-        }
-
-        void sort()
-        {
-            info.Sort();
         }
 
         [DefaultValue(null)]
@@ -173,8 +137,8 @@ namespace DevDash.Controls
 
         internal void CheckNewRow()
         {
-            if (shouldreset)
-                info.Groups.CheckNewRow(true);
+            if (ShouldReset)
+                _info.Groups.CheckNewRow(true);
         }
 
         class NullValue
@@ -195,7 +159,7 @@ namespace DevDash.Controls
             {
                 this.Owner = Owner;
 
-                set();
+                Set();
             }
 
             public IList Rows;
@@ -203,11 +167,11 @@ namespace DevDash.Controls
 
             public GroupList Groups;
 
-            void set()
+            private void Set()
             {
                 Groups = null;
 
-                if (Owner.groupon == null)
+                if (Owner._groupOn == null)
                 {
                     Rows = Owner.List;
                     return;
@@ -221,7 +185,7 @@ namespace DevDash.Controls
             public void ReBuild()
             {
                 if (Groups == null)
-                    set();
+                    Set();
                 else
                     Groups.Fill();
             }
@@ -232,27 +196,21 @@ namespace DevDash.Controls
             }
         }
 
-        GroupInfo info;
-
         GroupInfo Info
         {
             get
             {
-                if (info == null)
+                if (_info == null)
                 {
-                    info = new GroupInfo(this);
+                    _info = new GroupInfo(this);
                     if (NeedSync)
                         SyncCurrencyManagers();
                 }
-                return info;
+                return _info;
             }
         }
 
-        void OnGroupingChanged()
-        {
-            if (GroupingChanged != null)
-                GroupingChanged(this, EventArgs.Empty);
-        }
+        void OnGroupingChanged() => GroupingChanged?.Invoke(this, EventArgs.Empty);
 
         public event EventHandler GroupingChanged;
 
@@ -267,24 +225,23 @@ namespace DevDash.Controls
 
         public void ResetGroups()
         {
-            reset(false);
+            Reset(false);
         }
 
-        bool resetting;
-        void reset(bool fromlistchange)
+        void Reset(bool fromlistchange)
         {
-            if (info == null || resetting) return;
+            if (_info == null || _resetting) return;
             int pos = Position;
             var cur = Current;
             var grid = Grid;
             int? firstrow = grid == null ? (int?)null : grid.FirstDisplayedScrollingRowIndex;
-            resetting = true;
+            _resetting = true;
             try
             {
                 if (fromlistchange)
-                    info.ReBuild();
+                    _info.ReBuild();
                 else
-                    info = null;
+                    _info = null;
                 base.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
 
                 if (pos != -1)
@@ -313,7 +270,7 @@ namespace DevDash.Controls
             }
             finally
             {
-                resetting = false;
+                _resetting = false;
 
                 if (NeedSync)
                     SyncCurrencyManagers();
@@ -350,24 +307,18 @@ namespace DevDash.Controls
         /// </summary>
         public event EventHandler<GroupDisplayEventArgs> DisplayGroup;
 
-        internal void FireDisplayGroup(GroupDisplayEventArgs e)
-        {
-            if (DisplayGroup != null)
-                DisplayGroup(this, e);
-        }
-
-        CurrencyManager cm;
+        internal void FireDisplayGroup(GroupDisplayEventArgs e) => DisplayGroup?.Invoke(this, e);
 
         void UnwireCurMan()
         {
-            if (cm == null) return;
-            cm.CurrentChanged -= new EventHandler(bsource_CurrentChanged);
+            if (_currencyManager == null) return;
+            _currencyManager.CurrentChanged -= new EventHandler(BSource_CurrentChanged);
         }
 
         protected override void Dispose(bool disposing)
         {
             UnwireCurMan();
-            groupon = null;
+            _groupOn = null;
             base.Dispose(disposing);
         }
 
@@ -375,35 +326,32 @@ namespace DevDash.Controls
         {
             UnwireCurMan();
             ResetGroups();
-            var ds = DataSource;
-            if (ds is ICurrencyManagerProvider)
-                cm = ((ICurrencyManagerProvider)ds).CurrencyManager;
-            else
+
+            object dataSource = DataSource;
+            if (dataSource is ICurrencyManagerProvider provider)
             {
-                //find from bindingcontext?
+                _currencyManager = provider.CurrencyManager;
             }
 
-            if (cm != null)
+            if (_currencyManager != null)
             {
-                cm.CurrentChanged += new EventHandler(bsource_CurrentChanged);
+                _currencyManager.CurrentChanged += new EventHandler(BSource_CurrentChanged);
                 if (NeedSync) SyncCurrencyManagers();
             }
             base.OnDataSourceChanged(e);
         }
 
-        int suspendlistchange;
-
         protected override void OnListChanged(ListChangedEventArgs e)
         {
-            if (suspendlistchange > 0 || resetting) return;
+            if (_suspendListChange > 0 || _resetting) return;
 
-            if (shouldreset)
+            if (ShouldReset)
             {
                 switch (e.ListChangedType)
                 {
                     case ListChangedType.ItemChanged:
-                        if (groupon.IsProperty(e.PropertyDescriptor) && !info.Groups.IsNewRow(e.NewIndex))
-                            reset(true);
+                        if (_groupOn.IsProperty(e.PropertyDescriptor) && !_info.Groups.IsNewRow(e.NewIndex))
+                            Reset(true);
                         else
                             FireBaseChanged(new ListChangedEventArgs(ListChangedType.ItemChanged,
                                 IndexOf(List[e.NewIndex]),
@@ -411,19 +359,19 @@ namespace DevDash.Controls
                                 false);
                         return;
                     case ListChangedType.ItemAdded:
-                        if (info.Groups.HasNewRow)
-                            info.Groups.AddNew(List[e.NewIndex], true);
+                        if (_info.Groups.HasNewRow)
+                            _info.Groups.AddNew(List[e.NewIndex], true);
                         else
-                            reset(true);
+                            Reset(true);
                         return;
                     case ListChangedType.ItemDeleted:
-                        reset(true);
+                        Reset(true);
                         return;
                     case ListChangedType.Reset:
-                        reset(true);
+                        Reset(true);
                         return;
                     case ListChangedType.ItemMoved:
-                        reset(true); //check sorting??
+                        Reset(true); //check sorting??
                         return;
                 }
             }
@@ -433,154 +381,31 @@ namespace DevDash.Controls
                 case ListChangedType.PropertyDescriptorAdded:
                 case ListChangedType.PropertyDescriptorChanged:
                 case ListChangedType.PropertyDescriptorDeleted:
-                    props = null;
+                    _props = null;
                     break;
             }
 
             base.OnListChanged(e);
         }
 
-        bool shouldreset
-        {
-            get { return info != null && info.Groups != null; }
-        }
+        bool ShouldReset => _info != null && _info.Groups != null;
 
-        public override object AddNew()
-        {
-            if (!shouldreset) return base.AddNew();
-
-            object res;
-            int newrow;
-            suspendlistchange++;
-            try
-            {
-                res = base.AddNew();
-                newrow = info.Groups.AddNew(res, false);
-            }
-            finally
-            {
-                suspendlistchange--;
-            }
-
-            Position = newrow;
-            return res;
-        }
-
-        public override void ApplySort(PropertyDescriptor property, ListSortDirection sort)
-        {
-            if (property is PropertyWrapper)
-                property = (property as PropertyWrapper).Property;
-            base.ApplySort(property, sort);
-        }
-
-        public override void ApplySort(ListSortDescriptionCollection sorts)
-        {
-            base.ApplySort(sorts);
-        }
-
-        public override void RemoveAt(int index)
-        {
-            if (!shouldreset)
-                base.RemoveAt(index);
-            else if (!IsGroupRow(index))
-            {
-
-                suspendlistchange++;
-                try
-                {
-                    //remove from underlying list
-                    var rec = this[index];
-                    var i = List.IndexOf(rec);
-                    if (i != -1)
-                        List.RemoveAt(i);
-
-                    //remove from rowlist            
-                    info.Rows.RemoveAt(index);
-
-                    base.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemDeleted, index));
-
-                    var gr = GetGroup(index);
-                    if (gr != null)
-                        gr.Remove(rec);
-                }
-                finally
-                {
-                    suspendlistchange--;
-                }
-
-            }
-        }
-
-        public override void Remove(object value)
-        {
-            if (value is GroupRow) return;
-
-            int index = this.IndexOf(value);
-
-            if (index != -1)
-            {
-                RemoveAt(index);
-            }
-        }
-
-        void ICancelAddNew.CancelNew(int pos)
-        {
-            if (!shouldreset || !info.Groups.IsNewRow(pos)) return;
-
-            ICancelAddNew list = this.List as ICancelAddNew;
-            if (list != null)
-            {
-                suspendlistchange++;
-                try
-                {
-                    int li = List.IndexOf(this[pos]);
-                    list.CancelNew(li);
-                }
-                finally { suspendlistchange--; }
-            }
-
-            RemoveAt(pos);
-
-        }
-
-        protected override void OnCurrentChanged(EventArgs e)
-        {
-            base.OnCurrentChanged(e);
-            if (NeedSync)
-            {
-                var cur = Current;
-                while (cur is GroupRow)
-                {
-                    cur = ((GroupRow)cur).FirstRow;
-                    if (cur == cm.Current) return;
-                }
-                suspendsync = true;
-                try
-                {
-                    cm.Position = cm.List.IndexOf(cur);
-                }
-                finally { suspendsync = false; }
-            }
-        }
-
-        void bsource_CurrentChanged(object sender, EventArgs e)
+        private void BSource_CurrentChanged(object sender, EventArgs e)
         {
             if (NeedSync)
                 SyncCurrencyManagers();
         }
 
-        bool suspendsync;
         bool NeedSync
         {
             get
             {
-                if (cm == null || suspendlistchange > 0 || suspendsync || cm.Count == 0) return false;
-                //if (cm.IsBindingSuspended || this.IsBindingSuspended) return false;
+                if (_currencyManager == null || _suspendListChange > 0 || _suspendSync || _currencyManager.Count == 0) return false;
                 var p1 = Position;
-                if (p1 == cm.Position)
+                if (p1 == _currencyManager.Position)
                 {
                     if (p1 == -1) return false;
-                    return Current != cm.Current;
+                    return Current != _currencyManager.Current;
                 }
                 return true;
             }
@@ -588,50 +413,19 @@ namespace DevDash.Controls
 
         private void SyncCurrencyManagers()
         {
-            suspendsync = true;
+            _suspendSync = true;
             try
             {
-                if (cm.Count > 0)
-                    Position = IndexOf(cm.Current);
+                if (_currencyManager.Count > 0)
+                    Position = IndexOf(_currencyManager.Current);
             }
-            finally { suspendsync = false; }
+            finally { _suspendSync = false; }
 
         }
 
         public override int IndexOf(object value)
         {
             return Info.Rows.IndexOf(value);
-        }
-
-        public override bool Contains(object value)
-        {
-            return Info.Rows.Contains(value);
-        }
-
-        public override void Clear()
-        {
-            suspendlistchange++;
-            try
-            {
-                base.Clear();
-                if (shouldreset)
-                    info.Groups.Fill();
-                FireBaseReset(false);
-            }
-            finally
-            {
-                suspendlistchange--;
-            }
-        }
-
-        public override int Add(object value)
-        {
-            return base.Add(value);
-        }
-
-        public override void Insert(int index, object value)
-        {
-            base.Insert(index, value);
         }
 
         public partial class PropertyWrapper : PropertyDescriptor
@@ -659,7 +453,7 @@ namespace DevDash.Controls
             {
                 if (component is GroupRow)
                 {
-                    if (Owner.groupon.IsProperty(Property))
+                    if (Owner._groupOn.IsProperty(Property))
                         return (component as GroupRow).Value;
                     return null;
                 }
@@ -740,29 +534,27 @@ namespace DevDash.Controls
             }
         }
 
-        PropertyDescriptorCollection props;
-
         public override PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
         {
             if (listAccessors == null)
             {
-                if (props == null)
+                if (_props == null)
                 {
                     /*
                     props = new PropertyDescriptorCollection(
                         base.GetItemProperties(null).Cast<PropertyDescriptor>()
                         .Select(pd => new PropertyWrapper(pd, this)).ToArray());*/
-                    props = base.GetItemProperties(null);
-                    if (props == null) return null;
-                    PropertyDescriptor[] arr = new PropertyDescriptor[props.Count];
+                    _props = base.GetItemProperties(null);
+                    if (_props == null) return null;
+                    PropertyDescriptor[] arr = new PropertyDescriptor[_props.Count];
 
-                    for (int i = 0; i < props.Count; i++)
+                    for (int i = 0; i < _props.Count; i++)
                     {
-                        arr[i] = new PropertyWrapper(props[i], this);
+                        arr[i] = new PropertyWrapper(_props[i], this);
                     }
-                    props = new PropertyDescriptorCollection(arr);
+                    _props = new PropertyDescriptorCollection(arr);
                 }
-                return props;
+                return _props;
             }
             return base.GetItemProperties(listAccessors);
         }
