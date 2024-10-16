@@ -11,55 +11,48 @@ namespace DevDash.Controls
     /// </summary>
     public class GroupList : IEnumerable<GroupRow>
     {
+        private readonly GroupingInfo _groupingInfo;
+        private readonly List<GroupRow> _allGroups = new List<GroupRow>();
+        private GenericComparer _comparer;
 
-        GroupingInfo gi;
         public readonly GroupingSource Source;
         public readonly Type GroupValueType;
-        GenericComparer comparer;
-        /// <summary>
-        /// The current collection of <see cref="GroupRow"/>s
-        /// </summary>
+
         internal List<GroupRow> List = new List<GroupRow>();
-        /// <summary>
-        /// Collections of all groups. The entries in this list are saved to store settings (such as collapsed)
-        /// for each group. Only the row collection inside each <see cref="GroupRow"/> is cleared
-        /// </summary>
-        List<GroupRow> allgroups = new List<GroupRow>();
 
         public GroupList(GroupingSource Source)
         {
             this.Source = Source;
-            gi = Source.GroupOn;
-            GroupValueType = gi.GroupValueType;
+            _groupingInfo = Source.GroupOn;
+            GroupValueType = _groupingInfo.GroupValueType;
         }
 
         internal IList Fill()
         {
-            bool RemoveEmpty = allgroups.Count > 0;
+            bool RemoveEmpty = _allGroups.Count > 0;
 
             if (RemoveEmpty)
             {
-                foreach (var g in allgroups)
+                foreach (var g in _allGroups)
                 {
                     g.Rows.Clear();
                 }
             }
             List.Clear();
-            if (newrows != null)
-                newrows.Rows.Clear();
+            newrows?.Rows.Clear();
 
             foreach (object row in Source.List)
             {
-                object key = gi.GetGroupValue(row);
+                object key = _groupingInfo.GetGroupValue(row);
                 int hash = key == null ? 0 : key.GetHashCode();
                 GroupRow gr = null;
-                for (int i = 0; i < allgroups.Count; i++)
+                for (int i = 0; i < _allGroups.Count; i++)
                 {
-                    if (allgroups[i].HashCode == hash &&
-                        (key == null || key.Equals(allgroups[i].value))
+                    if (_allGroups[i].HashCode == hash &&
+                        (key == null || key.Equals(_allGroups[i].value))
                         )
                     {
-                        gr = allgroups[i];
+                        gr = _allGroups[i];
                         break;
                     }
                 }
@@ -72,21 +65,21 @@ namespace DevDash.Controls
                         HashCode = hash
                     };
 
-                    allgroups.Add(gr);
+                    _allGroups.Add(gr);
                 }
                 gr.Rows.Add(row); //not gr.Add to prevent listchanged events
             }
 
             if (RemoveEmpty)
             {
-                foreach (var g in allgroups)
+                foreach (var g in _allGroups)
                     if (g.Count > 0)
                         List.Add(g);
             }
             else
-                List.AddRange(allgroups);
+                List.AddRange(_allGroups);
 
-            sort(SortOrder.Ascending, false);
+            Sort(SortOrder.Ascending, false);
 
             if (Rows == null)
                 Rows = new ArrayList(List.Count + Source.BaseCount);
@@ -102,10 +95,7 @@ namespace DevDash.Controls
             return Rows;
         }
 
-        int compare(GroupRow g1, GroupRow g2)
-        {
-            return comparer.Compare(g1.value, g2.value);
-        }
+        private int Compare(GroupRow g1, GroupRow g2) => _comparer.Compare(g1.value, g2.value);
 
         internal ArrayList Rows;
 
@@ -194,17 +184,17 @@ namespace DevDash.Controls
             Source.FireBaseReset(false);
         }
 
-        void sort(SortOrder order, bool Rebuild)
+        void Sort(SortOrder order, bool Rebuild)
         {
             if (order != SortOrder.None)
             {
                 GroupRow g = Rebuild ? Source.GetGroup(Source.Position) : null;
 
-                if (comparer == null)
-                    comparer = new GenericComparer(GroupValueType);
+                if (_comparer == null)
+                    _comparer = new GenericComparer(GroupValueType);
 
-                comparer.Descending = order == SortOrder.Descending;
-                List.Sort(compare);
+                _comparer.Descending = order == SortOrder.Descending;
+                List.Sort(Compare);
 
                 if (Rebuild)
                 {
@@ -221,12 +211,9 @@ namespace DevDash.Controls
             }
         }
 
-        public void Sort(SortOrder sortOrder)
-        {
-            sort(sortOrder, true);
-        }
+        public void Sort(SortOrder sortOrder) => Sort(sortOrder, true);
 
-        internal int AddNew(object res, bool GroupOnly)
+        internal int AddNew(object res)
         {
             if (newrows == null)
             {
@@ -267,7 +254,6 @@ namespace DevDash.Controls
                     if (newrows == null)
                     {
                         newrows = new NewRowsGroup(this);
-                        //allgroups.Add(newrows);
                     }
                     newrows.Index = Rows.Count;
                     List.Add(newrows);
@@ -329,6 +315,9 @@ namespace DevDash.Controls
     /// </summary>
     public class GroupRow : IEnumerable
     {
+        // Interface implementation
+        IEnumerator IEnumerable.GetEnumerator() => Rows.GetEnumerator();
+
         /// <summary>
         /// The owning list that created this GroupRow
         /// </summary>
@@ -447,8 +436,10 @@ namespace DevDash.Controls
 
         public GroupDisplayEventArgs GetDisplayInfo(bool selected)
         {
-            GroupDisplayEventArgs e = new GroupDisplayEventArgs(this, Owner.Source.GroupOn);
-            e.Selected = selected;
+            GroupDisplayEventArgs e = new GroupDisplayEventArgs(this, Owner.Source.GroupOn)
+            {
+                Selected = selected
+            };
             SetDisplayInfo(e);
             if (e.Cancel) return null;
             Owner.Source.FireDisplayGroup(e);
@@ -495,14 +486,5 @@ namespace DevDash.Controls
         {
             get { return true; }
         }
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return Rows.GetEnumerator();
-        }
-
-        #endregion
     }
 }

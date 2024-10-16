@@ -360,7 +360,7 @@ namespace DevDash.Controls
                         return;
                     case ListChangedType.ItemAdded:
                         if (_info.Groups.HasNewRow)
-                            _info.Groups.AddNew(List[e.NewIndex], true);
+                            _info.Groups.AddNew(List[e.NewIndex]);
                         else
                             Reset(true);
                         return;

@@ -1,54 +1,35 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Linq.Expressions;
 
-//this file contains several support functions that are part of the library the grouper is kept in
 
 namespace DevDash
 {
-    /// <summary>
-    /// Comparer that tries to find the 'strongest' comparer for a type. 
-    /// if the type implements a generic IComparable, that is used.
-    /// otherwise if it implements a normal IComparable, that is used.
-    /// If neither are implemented, the ToString versions are compared. 
-    /// INullable structures are also supported.
-    /// This way, the DefaultComparer can compare any object types and can be used for sorting any source.
-    /// </summary>
-    /// <example>Array.Sort(YourArray,new GenericComparer());</example>
     public class GenericComparer : IGenericComparer
     {
-        public GenericComparer()
-        {
+        IComparer comp;
+        IEqualityComparer eq;
+        Type type;
+        Type targettype;
+        int factor = 1;
 
-        }
         public GenericComparer(Type Type)
         {
             this.Type = Type;
         }
 
-        Type type;
         public Type Type
         {
-            get
-            {
-                return type;
-            }
+            get => type;
             set
             {
                 if (type == value) return;
-                if (value == null) throw new ArgumentNullException();
-                type = value;
-                reset();
+                type = value ?? throw new ArgumentNullException();
+                Reset();
             }
         }
 
-        Type targettype;
-        /// <summary>
-        /// normally the same as the type, but can be set to a different type
-        /// </summary>
         public Type TargetType
         {
             get
@@ -60,32 +41,21 @@ namespace DevDash
             {
                 if (TargetType == value) return;
                 targettype = value;
-                reset();
+                Reset();
             }
         }
 
-        void reset()
+        void Reset()
         {
             comp = null;
             eq = null;
         }
 
-        IComparer comp;
-        IEqualityComparer eq;
-
         public bool Descending
         {
-            get
-            {
-                return factor < 0;
-            }
-            set
-            {
-                factor = value ? -1 : 1;
-            }
+            get => factor < 0;
+            set => factor = value ? -1 : 1;
         }
-
-        int factor = 1;
 
         public int Compare(object x, object y)
         {
@@ -119,12 +89,7 @@ namespace DevDash
 
         #endregion
 
-        public IGenericComparer ThenBy(GenericComparer cmp)
-        {
-            var list = new GenericComparers();
-            list.Add(cmp);
-            return list;
-        }
+        public IGenericComparer ThenBy(GenericComparer cmp) => new GenericComparers { cmp };
     }
 
     public interface IGenericComparer : IComparer, IEqualityComparer
@@ -132,9 +97,6 @@ namespace DevDash
         IGenericComparer ThenBy(GenericComparer cmp);
     }
 
-    /// <summary>
-    /// A list of <see cref="GenericComparer"/> to compare multiple GenericComparers after one and other
-    /// </summary>
     public class GenericComparers : List<GenericComparer>, IGenericComparer
     {
         public int Compare(object x, object y)
@@ -172,7 +134,7 @@ namespace DevDash
         }
     }
 
-    static partial class CompareFunctions
+    internal static partial class CompareFunctions
     {
         static IComparer GetGenericComparer(Type From, Type To)
         {
@@ -191,14 +153,13 @@ namespace DevDash
             return type;
         }
 
-        static bool hasbase(Type type)
+        static bool HasBase(Type type)
         {
             return type.BaseType != null && type.BaseType != typeof(object);
         }
 
         static object GetGeneric(Type From, Type To, params Type[] GenericBaseTypes)
         {
-            //From = GetBaseType(From);
             while (true)
             {
                 foreach (var g in GenericBaseTypes)
@@ -221,12 +182,11 @@ namespace DevDash
                     }
                 }
 
-                if (hasbase(From))
+                if (HasBase(From))
                     From = From.BaseType;
                 else
                     return null;
             }
-            //return null;
         }
 
         internal static IComparer GetComparer(Type From, Type To)
@@ -268,28 +228,6 @@ namespace DevDash
                 return o.GetHashCode();
             }
         }
-        /*
-        class NullableComparer<T> : IComparer
-            where T : struct
-        {
-
-            public readonly IComparer BaseComparer;
-            public NullableComparer(IComparer BaseComparer)
-            {
-                this.BaseComparer = BaseComparer;
-
-            }
-
-            object getval(object o)
-            {
-                return ((Nullable<T>)o).Value;
-            }
-
-            public int Compare(object x, object y)
-            {
-                return BaseComparer.Compare(getval(x), getval(y));
-            }
-        }*/
 
         class StrongEquatable<F, T> : IEqualityComparer
           where F : IEquatable<T>
@@ -351,98 +289,4 @@ namespace DevDash
             }
         }
     }
-
-    public class GenericComparer<T> : GenericComparer, IComparer<T>
-    {
-
-        public GenericComparer()
-            : base(typeof(T))
-        { }
-
-        public int Compare(T a, T b)
-        {
-            return base.Compare(a, b);
-        }
-    }
-
-    public class GenericComparer<T1, T2> : GenericComparer
-    {
-        public GenericComparer()
-            : base(typeof(T1))
-        {
-            TargetType = typeof(T2);
-        }
-        public int Compare(T1 a, T2 b)
-        {
-            return base.Compare(a, b);
-        }
-
-        public bool Equals(T1 a, T2 b)
-        {
-            return base.Equals(a, b);
-        }
-    }
-
-    public class PropertyDescriptorComparer : GenericComparer
-    {
-        public readonly PropertyDescriptor Prop;
-
-        public PropertyDescriptorComparer(PropertyDescriptor Prop)
-            : this(Prop, true)
-        {
-        }
-        public PropertyDescriptorComparer(PropertyDescriptor Prop, bool Descending)
-            : base(Prop.PropertyType)
-        {
-            this.Prop = Prop;
-            this.Descending = Descending;
-        }
-    }
-
-    static class Parser
-    {
-
-        public static string GetFieldName(Expression Field)
-        {
-            var arr = GetMembers(Field).ToArray();
-            if (arr.Length == 0) throw new Exception("Could not resolve FieldName of " + Field);
-            if (arr.Length == 1) return arr[0].Member.Name;
-            throw new Exception("Multipe field names found for " + Field);
-        }
-
-        public static string GetFieldName<RecordType, T>(Expression<Func<RecordType, T>> Field)
-        {
-            return GetFieldName((LambdaExpression)Field);
-
-        }
-
-        public static IEnumerable<string> GetFieldNames<RecordType, T>(params Expression<Func<RecordType, T>>[] Fields)
-        {
-            return GetMembers(Fields).Select(f => f.Member.Name);
-        }
-
-        static IEnumerable<MemberExpression> GetMembers(params Expression[] expr)
-        {
-            foreach (var e in expr)
-            {
-                var exp = e;
-                if (exp is LambdaExpression)
-                    exp = (exp as LambdaExpression).Body;
-                if (exp.NodeType == ExpressionType.Convert)
-                    exp = (exp as UnaryExpression).Operand;
-                if (exp is MemberExpression)
-                    yield return (MemberExpression)exp;
-                else if (exp is NewExpression)
-                {
-                    foreach (var me in
-                        from ne in ((NewExpression)exp).Arguments
-                        from m in GetMembers(ne)
-                        select m)
-                        yield return me;
-                }
-
-            }
-        }
-    }
-
 }
