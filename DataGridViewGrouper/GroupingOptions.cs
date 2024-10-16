@@ -45,7 +45,6 @@ namespace DevDash.Controls
             }
         }
 
-
         T GetValue<T>(GroupingOption o)
         {
             return ((GroupingOptionValue<T>)this[o]).Value;
@@ -55,10 +54,6 @@ namespace DevDash.Controls
             ((GroupingOptionValue<T>)this[o]).Value = value;
         }
 
-        bool ShouldSerialize(GroupingOption o)
-        {
-            return !this[o].IsDefault;
-        }
 
         /// <summary>
         /// If true, new groups always start collapsed
@@ -68,7 +63,6 @@ namespace DevDash.Controls
             get { return GetValue<bool>(GroupingOption.StartCollapsed); }
             set { SetValue(GroupingOption.StartCollapsed, value); }
         }
-        bool ShouldSerializeStartCollapsed() { return ShouldSerialize(GroupingOption.StartCollapsed); }
 
         public const SortOrder DefaultGroupSortOrder = SortOrder.Ascending;
         [DefaultValue(DefaultGroupSortOrder)]
@@ -77,60 +71,17 @@ namespace DevDash.Controls
             get { return GetValue<SortOrder>(GroupingOption.GroupSortOrder); }
             set { SetValue(GroupingOption.GroupSortOrder, value); }
         }
-        bool ShouldSerializeGroupSortOrder() { return ShouldSerialize(GroupingOption.GroupSortOrder); }
 
         public bool AlwaysGroupOnText
         {
             get { return GetValue<bool>(GroupingOption.AlwaysGroupOnText); }
             set { SetValue(GroupingOption.AlwaysGroupOnText, value); }
         }
-        bool ShouldSerializeAlwaysGroupOnText() { return ShouldSerialize(GroupingOption.AlwaysGroupOnText); }
-
-        public bool ShowCount
-        {
-            get { return GetValue<bool>(GroupingOption.ShowCount); }
-            set { SetValue(GroupingOption.ShowCount, value); }
-        }
-        bool ShouldSerializeShowCount() { return ShouldSerialize(GroupingOption.ShowCount); }
 
         public bool ShowGroupName
         {
             get { return GetValue<bool>(GroupingOption.ShowGroupName); }
             set { SetValue(GroupingOption.ShowGroupName, value); }
-        }
-        bool ShouldSerializeShowGroupName() { return ShouldSerialize(GroupingOption.ShowGroupName); }
-
-        public bool SelectRowsOnDoubleClick
-        {
-            get { return GetValue<bool>(GroupingOption.SelectRowsOnDoubleClick); }
-            set { SetValue(GroupingOption.SelectRowsOnDoubleClick, value); }
-        }
-        bool ShouldSerializeSelectRowsOnDoubleClick() { return ShouldSerialize(GroupingOption.SelectRowsOnDoubleClick); }
-
-        public bool HasNonDefaultValues
-        {
-            get
-            {
-                foreach (var g in list)
-                    if (!g.IsDefault) return true;
-                return false;
-            }
-        }
-
-        public void CopyValues(GroupingOptions options)
-        {
-            foreach (var g in list)
-            {
-                g.CopyValue(options[g.Option]);
-            }
-        }
-
-        public void SetDefaults()
-        {
-            foreach (var g in list)
-            {
-                g.Reset();
-            }
         }
 
         internal void NotifyChanged(GroupingOption o)
@@ -162,34 +113,10 @@ namespace DevDash.Controls
 
     partial class GroupingOptions : ISerializable
     {
-        #region ISerializable Members
-
-        GroupingOptions(SerializationInfo info, StreamingContext context)
-            : this()
-        {
-            foreach (var kv in info)
-            {
-                try
-                {
-                    var o = EnumFunctions.Parse<GroupingOption>(kv.Name);
-                    this[o].SetValue(kv.Value);
-                }
-                catch
-                {
-                }
-            }
-        }
-
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            foreach (var g in list)
-                if (!g.IsDefault)
-                {
-                    info.AddValue(g.Option.ToString(), g.GetValue());
-                }
+            throw new NotImplementedException();
         }
-
-        #endregion
     }
 
     partial class GroupingOptions : ICustomSerializer
@@ -258,7 +185,7 @@ namespace DevDash.Controls
         public readonly GroupingOption Option;
         protected GroupingOptionValue(GroupingOption o)
         {
-            this.Option = o;
+            Option = o;
         }
 
         public abstract bool IsDefault
@@ -283,9 +210,10 @@ namespace DevDash.Controls
         public GroupingOptionValue(T Default, GroupingOption o)
             : base(o)
         {
-            this.DefaultValue = Default;
-            this.value = DefaultValue;
+            DefaultValue = Default;
+            value = DefaultValue;
         }
+
         [NonSerialized]
         public T DefaultValue;
 
@@ -363,52 +291,6 @@ namespace DevDash.Controls
     public static class EnumFunctions
     {
         /// <summary>
-        /// Gets all values of the specified enumeration
-        /// </summary>
-        public static IEnumerable<T> GetValues<T>()
-            where T : IComparable, IFormattable, IConvertible
-        {
-            return GetValues<T>(x => x);
-        }
-
-        /// <summary>
-        /// Gets all values of the specified enumeration
-        /// </summary>
-        public static IEnumerable<T> GetValues<T>(Func<T, T> pred)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            foreach (T item in Enum.GetValues(typeof(T)))
-            {
-                yield return pred(item);
-            }
-        }
-
-        /// <summary>
-        /// Gets all values of the specified enumeration that comply
-        /// to the specified predicate
-        /// </summary>
-        public static IEnumerable<T> GetValues<T>(Func<T, bool> predicate)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            foreach (var item in GetValues<T>())
-            {
-                if (predicate(item))
-                    yield return item;
-            }
-        }
-
-        /// <summary>
-        /// Checks if the specified enumeration value has the flag bit set
-        /// </summary>        
-        [Obsolete("Framework 4.0 contains a native HasFlag function :D")]
-        public static bool HasFlag<T>(this T value, T flag)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            int fl = flag.ToInt32(null);
-            return (value.ToInt32(null) & fl) == fl;
-        }
-
-        /// <summary>
         /// Calls <see cref="Enum.Parse"/> and creates the strongly typed result
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -419,69 +301,6 @@ namespace DevDash.Controls
         {
             if (string.IsNullOrEmpty(Value)) return default(T);
             return (T)Enum.Parse(typeof(T), Value, true);
-        }
-
-
-        /// <summary>
-        /// Splits up a flags enumeration into its base values
-        /// </summary>
-        public static IEnumerable<T> Select<T>(this T e, Func<T, T> pred)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            foreach (T item in Split(e))
-            {
-                yield return pred(item);
-            }
-        }
-
-        /// <summary>
-        /// Splits up a flags enumeration into its base values
-        /// </summary>
-        public static IEnumerable<T> Split<T>(this T enumeration)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            int val = Convert.ToInt32(enumeration);
-            foreach (var item in GetValues<T>())
-            {
-                int i = item.ToInt32(null);
-                if (i > 0 & (i & val) == i)
-                    yield return item;
-            }
-        }
-
-        /// <summary>
-        /// Splits up a flags enumeration into its base values, and filters values already set
-        /// by a mask
-        /// </summary>
-        public static IEnumerable<T> Split<T>(this T enumeration, bool CompactMaskedValues)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            var res = Split(enumeration);
-            if (!CompactMaskedValues) return res;
-
-            var list = res.OrderByDescending(r => r.ToInt32(null)).ToList();
-            for (int i = 0; i < list.Count; i++)
-            {
-                var val = list[i].ToInt32(null);
-                for (int j = i + 1; j < list.Count; j++)
-                {
-                    if ((val & list[j].ToInt32(null)) == list[j].ToInt32(null))
-                        list.RemoveAt(j--);
-                }
-            }
-            return list;
-
-        }
-
-
-        public static IEnumerable<T> GetValues<T>(this T e, Func<T, bool> pred)
-            where T : IComparable, IFormattable, IConvertible
-        {
-            foreach (T item in Split(e))
-            {
-                if (pred(item))
-                    yield return item;
-            }
         }
     }
 }

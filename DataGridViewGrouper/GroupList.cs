@@ -150,17 +150,6 @@ namespace DevDash.Controls
             }
         }
 
-        public GroupRow[] ToArray()
-        {
-            return List.ToArray();
-        }
-
-        public int Count { get { return List.Count; } }
-        public GroupRow this[int Index]
-        {
-            get { return List[Index]; }
-        }
-
         public int IndexOf(GroupRow row)
         {
             return List.IndexOf(row);
