@@ -1,20 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<OutputType>Library</OutputType>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<UseWindowsForms>true</UseWindowsForms>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	</PropertyGroup>
-	<PropertyGroup>
-		<StartupObject />
-	</PropertyGroup>
-	<ItemGroup>
-		<Compile Update="DataGridViewGrouper.cs">
-			<SubType>Component</SubType>
-		</Compile>
-		<Compile Update="GroupingSource.cs">
-			<SubType>Component</SubType>
-		</Compile>
-	</ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
 </Project>
