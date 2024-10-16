@@ -44,11 +44,8 @@ namespace DevDash.Controls
                 if (grid == value) return;
                 if (grid != null)
                 {
-                    //grid.Sorted -= new EventHandler(grid_Sorted);
                     grid.RowPrePaint -= new DataGridViewRowPrePaintEventHandler(grid_RowPrePaint);
-                    //grid.RowPostPaint -= new DataGridViewRowPostPaintEventHandler(grid_RowPostPaint);
                     grid.CellBeginEdit -= new DataGridViewCellCancelEventHandler(grid_CellBeginEdit);
-                    grid.CellDoubleClick -= new DataGridViewCellEventHandler(grid_CellDoubleClick);
                     grid.CellClick -= new DataGridViewCellEventHandler(grid_CellClick);
                     grid.MouseMove -= new MouseEventHandler(grid_MouseMove);
                     grid.SelectionChanged -= new EventHandler(grid_SelectionChanged);
@@ -60,11 +57,8 @@ namespace DevDash.Controls
                 grid = value;
                 if (grid != null)
                 {
-                    //grid.Sorted += new EventHandler(grid_Sorted);
                     grid.RowPrePaint += new DataGridViewRowPrePaintEventHandler(grid_RowPrePaint);
-                    //grid.RowPostPaint += new DataGridViewRowPostPaintEventHandler(grid_RowPostPaint);
                     grid.CellBeginEdit += new DataGridViewCellCancelEventHandler(grid_CellBeginEdit);
-                    grid.CellDoubleClick += new DataGridViewCellEventHandler(grid_CellDoubleClick);
                     grid.CellClick += new DataGridViewCellEventHandler(grid_CellClick);
                     grid.MouseMove += new MouseEventHandler(grid_MouseMove);
                     grid.SelectionChanged += new EventHandler(grid_SelectionChanged);
@@ -82,13 +76,13 @@ namespace DevDash.Controls
         #region Select/Collapse/Expand
         void grid_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.X < HeaderOffset && e.X >= HeaderOffset - CollapseBoxWidth)
+            //if (e.X < HeaderOffset && e.X >= HeaderOffset - CollapseBoxWidth)
             {
                 DataGridView.HitTestInfo ht = grid.HitTest(e.X, e.Y);
                 if (IsGroupRow(ht.RowIndex))
                 {
                     var y = e.Y - ht.RowY;
-                    if (y >= CollapseBox_Y_Offset && y <= CollapseBox_Y_Offset + CollapseBoxWidth)
+                    // if (y >= CollapseBox_Y_Offset && y <= CollapseBox_Y_Offset + CollapseBoxWidth)
                     {
                         CheckCollapsedFocused(ht.ColumnIndex, ht.RowIndex);
                         return;
@@ -126,8 +120,8 @@ namespace DevDash.Controls
             if (e.RowIndex == -1) return;
             if (e.RowIndex == capturedCollapseBox.Y)
             {
-                var gr = GetGroupRow(e.RowIndex);
-                gr.Collapsed = !gr.Collapsed;
+                var groupRow = GetGroupRow(e.RowIndex);
+                groupRow.Collapsed = !groupRow.Collapsed;
             }
         }
 
@@ -174,20 +168,6 @@ namespace DevDash.Controls
         public void CollapseAll()
         {
             source.CollapseExpandAll(true);
-        }
-
-        void grid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (IsGroupRow(e.RowIndex) && capturedCollapseBox.Y != e.RowIndex && Options.SelectRowsOnDoubleClick)
-            {
-                var gr = GetGroupRow(e.RowIndex);
-                gr.Collapsed = false;
-                grid.SuspendLayout();
-                grid.CurrentCell = grid[1, e.RowIndex + 1];
-                grid.Rows[e.RowIndex].Selected = false;
-                SelectGroup(e.RowIndex);
-                grid.ResumeLayout();
-            }
         }
 
         GroupRow GetGroupRow(int RowIndex)
@@ -522,8 +502,8 @@ namespace DevDash.Controls
             //collapse/expand symbol               
             {
                 var circle = GetCollapseBoxBounds(DirectionOffsset, e.RowBounds.Y);
-                if (capturedCollapseBox.Y == e.RowIndex)
-                    e.Graphics.FillEllipse(Brushes.Yellow, circle);
+                //if (capturedCollapseBox.Y == e.RowIndex)
+                //    e.Graphics.FillEllipse(Brushes.Yellow, circle);
                 e.Graphics.DrawEllipse(LinePen, circle);
                 bool collapsed = groupRow.Collapsed;
                 int cx;
