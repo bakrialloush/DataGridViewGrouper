@@ -6,6 +6,8 @@ namespace Test
 {
     public partial class ExampleWithControl : Form
     {
+        private readonly DevDash.Controls.DataGridViewGrouper _grouper;
+
         public ExampleWithControl()
         {
             InitializeComponent();
@@ -17,8 +19,9 @@ namespace Test
 
 
             //once the datagridview is set (in this case in the designer), the Grouper property can be used to set the grouping
-            var grouper = dataGridViewGrouperControl1.Grouper;
-            grouper.SetGroupOn("AString");
+            _grouper = new DevDash.Controls.DataGridViewGrouper(dataGridView1);
+            _grouper.SetGroupOn("AString");
+            _grouper.DisplayGroup += Grouper_DisplayGroup;
 
             //also valid:
             //grouper.SetGroupOn<TestData>(t => t.AString);
@@ -31,8 +34,8 @@ namespace Test
             //grouper.Options.StartCollapsed = true;
 
             //to collapse all loaded rows: (the difference with setting the option above, is that after choosing a new grouping (or on a reload), the new groups would expand.
-            grouper.ExpandAll();
-            grouper.CollapseAll();
+            _grouper.ExpandAll();
+            _grouper.CollapseAll();
 
             //if you don't want the (rowcount) to be shown in the headers:
             //grouper.Options.ShowCount = false;

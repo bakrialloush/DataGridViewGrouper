@@ -52,15 +52,6 @@
     <Compile Include="DataGridViewGrouper.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DataGridViewGrouperContextMenuStrip.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="DataGridViewGrouperControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="DataGridViewGrouperControl.designer.cs">
-      <DependentUpon>DataGridViewGrouperControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="GroupingInfo.cs" />
     <Compile Include="GroupingOptions.cs" />
     <Compile Include="GroupingSource.cs">
@@ -68,16 +59,7 @@
     </Compile>
     <Compile Include="GroupList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SearchBox.designer.cs">
-      <DependentUpon>SearchBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="Support.cs" />
-    <EmbeddedResource Include="DataGridViewGrouperControl.resx">
-      <DependentUpon>DataGridViewGrouperControl.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -88,10 +70,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SearchBox.resx">
-      <DependentUpon>SearchBox.cs</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
