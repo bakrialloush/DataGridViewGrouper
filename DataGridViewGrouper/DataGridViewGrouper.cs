@@ -315,77 +315,11 @@ namespace DevDash.Controls
             }
         }
 
-        public bool IsGrouped
-        {
-            get
-            {
-                return source.IsGrouped;
-            }
-        }
-
-        [DefaultValue(SortOrder.Ascending)]
-        public SortOrder GroupSortOrder
-        {
-            get
-            {
-                return source.GroupSortOrder;
-            }
-            set
-            {
-                source.GroupSortOrder = value;
-            }
-        }
-
-        [DefaultValue(null)]
-        public GroupingOptions Options
-        {
-            get { return source.Options; }
-            set { source.Options = value; }
-        }
-
-        public bool SetGroupOn(DataGridViewColumn col)
-        {
-            return SetGroupOn(col == null ? null : col.DataPropertyName);
-        }
-
-        public bool SetGroupOn(PropertyDescriptor Property)
-        {
-            return CheckSource().SetGroupOn(Property);
-        }
-
-        public void SetCustomGroup<T>(Func<T, object> GroupValueProvider, string Description = null)
-        {
-            CheckSource().SetCustomGroup(GroupValueProvider, Description);
-        }
-
-        public void SetGroupOnStartLetters(GroupingInfo g, int Letters)
-        {
-            CheckSource().SetGroupOnStartLetters(g, Letters);
-        }
-
-        public void SetGroupOnStartLetters(string Property, int Letters)
-        {
-            CheckSource().SetGroupOnStartLetters(Property, Letters);
-        }
-
         public bool SetGroupOn(string Name)
         {
             if (string.IsNullOrEmpty(Name))
                 return RemoveGrouping();
             return CheckSource().SetGroupOn(Name);
-        }
-
-        //added after linq was added to the framework to facilitate setting properties
-        public bool SetGroupOn<T>(System.Linq.Expressions.Expression<Func<T, object>> Property)
-        {
-            if (Property == null)
-                return RemoveGrouping();
-            return CheckSource().SetGroupOn(Parser.GetFieldName(Property));
-        }
-
-        public PropertyDescriptor GetProperty(string Name)
-        {
-            return CheckSource().GetProperty(Name);
         }
 
         /// <summary>
@@ -519,29 +453,6 @@ namespace DevDash.Controls
                 CollapseBoxWidth);
         }
         #endregion
-
-        public bool CurrentRowIsGroupRow
-        {
-            get
-            {
-                if (grid == null) return false;
-                return IsGroupRow(grid.CurrentCellAddress.Y);
-            }
-        }
-
-        [DefaultValue(null)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public GroupRow CurrentGroup
-        {
-            get
-            {
-                return source.CurrentGroup;
-            }
-            set
-            {
-                source.CurrentGroup = value;
-            }
-        }
     }
 
     public class GroupDisplayEventArgs : CancelEventArgs

@@ -29,14 +29,12 @@ namespace DevDash.Controls
         public GroupList(GroupingSource Source)
         {
             this.Source = Source;
-            this.gi = Source.GroupOn;
-            this.GroupValueType = gi.GroupValueType;
+            gi = Source.GroupOn;
+            GroupValueType = gi.GroupValueType;
         }
 
         internal IList Fill()
         {
-            var options = Source.Options;
-            bool startcollapsed = options.StartCollapsed;
             bool RemoveEmpty = allgroups.Count > 0;
 
             if (RemoveEmpty)
@@ -44,7 +42,6 @@ namespace DevDash.Controls
                 foreach (var g in allgroups)
                 {
                     g.Rows.Clear();
-                    //if (startcollapsed)g.SetCollapsed(true, false);
                 }
             }
             List.Clear();
@@ -69,11 +66,11 @@ namespace DevDash.Controls
 
                 if (gr == null)
                 {
-                    gr = new GroupRow(this);
-                    gr.value = key;
-                    gr.HashCode = hash;
-                    if (startcollapsed)
-                        gr.SetCollapsed(true, false);
+                    gr = new GroupRow(this)
+                    {
+                        value = key,
+                        HashCode = hash
+                    };
 
                     allgroups.Add(gr);
                 }
@@ -90,14 +87,14 @@ namespace DevDash.Controls
             else
                 List.AddRange(allgroups);
 
-            sort(Source.GroupSortOrder, false);
+            sort(SortOrder.Ascending, false);
 
             if (Rows == null)
                 Rows = new ArrayList(List.Count + Source.BaseCount);
             else
                 Rows.Clear();
 
-            if (startcollapsed && !RemoveEmpty)
+            if (!RemoveEmpty)
                 AddGroupsOnly();
             else
                 RebuildRows();
@@ -110,8 +107,6 @@ namespace DevDash.Controls
         {
             return comparer.Compare(g1.value, g2.value);
         }
-
-
 
         internal ArrayList Rows;
 
@@ -471,9 +466,7 @@ namespace DevDash.Controls
                 e.ForeColor = e.Selected ? grid.DefaultCellStyle.SelectionForeColor : grid.DefaultCellStyle.ForeColor;
             }
 
-            var o = Owner.Source.Options;
-            if (o.ShowGroupName)
-                e.Header = e.GroupingInfo.ToString();
+            e.Header = e.GroupingInfo.ToString();
         }
 
         public virtual void Remove(object rec)

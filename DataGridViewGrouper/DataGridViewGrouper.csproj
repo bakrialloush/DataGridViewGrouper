@@ -53,7 +53,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GroupingInfo.cs" />
-    <Compile Include="GroupingOptions.cs" />
     <Compile Include="GroupingSource.cs">
       <SubType>Component</SubType>
     </Compile>

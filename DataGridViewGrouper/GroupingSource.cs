@@ -41,15 +41,15 @@ namespace DevDash.Controls
                 else
                 {
                     if (value.Equals(groupon)) return;
-                    setgroupon(value, Options.AlwaysGroupOnText);
+                    setgroupon(value);
                 }
             }
         }
 
-        void setgroupon(GroupingInfo value, bool forcetext)
+        void setgroupon(GroupingInfo value)
         {
             info = null;
-            if (forcetext && value.GroupValueType != typeof(string))
+            if (value.GroupValueType != typeof(string))
             {
                 value = new StringGroupWrapper(value);
             }
@@ -133,100 +133,9 @@ namespace DevDash.Controls
                 catch { }
         }
 
-
-
-        [DefaultValue(GroupingOptions.DefaultGroupSortOrder)]
-        public SortOrder GroupSortOrder
-        {
-            get
-            {
-                if (options == null) return GroupingOptions.DefaultGroupSortOrder;
-                return options.GroupSortOrder;
-            }
-            set
-            {
-                Options.GroupSortOrder = value;
-            }
-        }
-
-        GroupingOptions options;
-        [DefaultValue(null)]
-        public GroupingOptions Options
-        {
-            get
-            {
-                if (options == null && !DesignMode)
-                    Options = new GroupingOptions();
-                return options;
-            }
-            set
-            {
-                if (options == value) return;
-                var cursort = GroupSortOrder;
-                if (options != null)
-                {
-                    options.OptionChanged -= new EventHandler<GroupingOptionChangedEventArgs>(options_OptionChanged);
-                    cursort = options.GroupSortOrder;
-                }
-                options = value;
-                if (options != null)
-                {
-                    options.OptionChanged += new EventHandler<GroupingOptionChangedEventArgs>(options_OptionChanged);
-                }
-                if (GroupSortOrder != cursort)
-                    sort();
-            }
-        }
-
-        void options_OptionChanged(object sender, GroupingOptionChangedEventArgs e)
-        {
-
-            if (!shouldreset) return;
-            if (e.Option == GroupingOption.GroupSortOrder)
-                sort();
-            else if (e.Option == GroupingOption.AlwaysGroupOnText)
-            {
-                setgroupontext();
-            }
-            else if (e.Option == GroupingOption.StartCollapsed)
-            {
-                CollapseExpandAll(options.StartCollapsed);
-            }
-            else if (e.Option == GroupingOption.ShowCount
-                || e.Option == GroupingOption.ShowGroupName)
-            {
-                if (Grid != null)
-                    InvalidateGridGroupRows();
-            }
-        }
-
-        void InvalidateGridGroupRows()
-        {
-            var grid = Grid;
-            foreach (var gr in info.Groups)
-                grid.InvalidateRow(gr.Index);
-        }
-
-        void setgroupontext()
-        {
-            var istext = groupon.GroupValueType == typeof(string);
-            if (istext == options.AlwaysGroupOnText) return;
-            if (istext)
-            {
-                if (groupon is StringGroupWrapper)
-                    GroupOn = ((StringGroupWrapper)groupon).Grouper;
-            }
-            else
-                setgroupon(groupon, true);
-        }
-
         void sort()
         {
-            if (info == null) return;
-            if (GroupSortOrder == SortOrder.None)
-                reset(false);
-            else
-                info.Sort();
+            info.Sort();
         }
 
 
@@ -327,8 +236,7 @@ namespace DevDash.Controls
 
             public void Sort()
             {
-                if (Groups == null) return;
-                Groups.Sort(Owner.GroupSortOrder);
+                Groups.Sort(SortOrder.Ascending);
             }
         }
 
