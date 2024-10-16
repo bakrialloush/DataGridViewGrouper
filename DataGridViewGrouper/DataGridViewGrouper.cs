@@ -301,7 +301,7 @@ namespace DevDash.Controls
 
         int DirectionOffsset => _grid.RightToLeft == RightToLeft.Yes ? _grid.Width - _grid.RowHeadersWidth : 0;
 
-        int TitleOffset => _grid.RightToLeft == RightToLeft.Yes ? _grid.Width - HeaderOffset * 4 : HeaderOffset * 2;
+        // int TitleOffset => _grid.RightToLeft == RightToLeft.Yes ? _grid.Width - HeaderOffset * 4 : HeaderOffset * 2;
 
         bool DrawExpandCollapseLines => _grid.RowHeadersVisible;
 
@@ -342,7 +342,7 @@ namespace DevDash.Controls
                 e.Graphics.DrawLine(Pens.SteelBlue, rowBounds.Left, rowBounds.Bottom, rowBounds.Right, rowBounds.Bottom);
                 //group value
                 {
-                    rowBounds.X = TitleOffset - _grid.HorizontalScrollingOffset;
+                    // rowBounds.X = TitleOffset - _grid.HorizontalScrollingOffset;
                     //clear background
                     e.Graphics.FillRectangle(bgb, rowBounds);
                     using (var brush = new SolidBrush(info.ForeColor))
@@ -354,12 +354,14 @@ namespace DevDash.Controls
                         };
                         if (info.Header != null)
                         {
-                            var size = e.Graphics.MeasureString(info.Header, info.Font);
+                            int titleWidth = (int)e.Graphics.MeasureString(info.Header, info.Font).Width;
+                            rowBounds.X = _grid.RightToLeft == RightToLeft.Yes ?
+                                 _grid.Width - _grid.RowHeadersWidth - 5 - titleWidth :
+                                _grid.RowHeadersWidth + 5;
                             e.Graphics.DrawString(info.Header, info.Font, brush, rowBounds, format);
-                            rowBounds.X -= 25;// (int)size.Width - 5;
                         }
                     }
-                    e.Graphics.FillRectangle(bgb, 0, rowBounds.Top, TitleOffset, rowBounds.Height);
+                    // e.Graphics.FillRectangle(bgb, 0, rowBounds.Top, TitleOffset, rowBounds.Height);
                 }
             }
 

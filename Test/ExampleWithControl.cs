@@ -13,11 +13,6 @@ namespace Test
             InitializeComponent();
             dataGridView1.DataSource = TestData.CreateTestData();
 
-            //all that is done to get the datagridview to work with the grouping control, is adding the
-            // DataGridViewGrouperControl and setting its DataGridView property to the grid
-            // the grouper control can reuse existing DataGridViewGrouper components or creates its own (as is done here)
-
-            //once the datagridview is set (in this case in the designer), the Grouper property can be used to set the grouping
             _grouper = new DevDash.Controls.DataGridViewGrouper(dataGridView1);
             _grouper.SetGroupOn("AString");
             _grouper.DisplayGroup += Grouper_DisplayGroup;
@@ -26,23 +21,9 @@ namespace Test
             //grouper.SetGroupOn<TestData>(t => t.AString);
             //grouper.SetGroupOn(this.dataGridView1.Columns["AString"]);
 
-            //all options available in the control (via the dropdown menu) can be set in code as well and vice versa all options in this example can be set via the control.
-
-            //to start with all rows collapsed on a (re)load or when the group is changed you can set the option startcollapsed:
-            //grouper.Options.StartCollapsed = true;
-
             //to collapse all loaded rows: (the difference with setting the option above, is that after choosing a new grouping (or on a reload), the new groups would expand.
             _grouper.ExpandAll();
             _grouper.CollapseAll();
-
-            //if you don't want the (rowcount) to be shown in the headers:
-            //grouper.Options.ShowCount = false;
-
-            //if you don't want the grouped column name to be repeated in the headers:
-            //grouper.Options.ShowGroupName = false;
-
-            //default sort order for the groups is ascending, you can change that in the options as well (ascending, descending or none)
-            //grouper.Options.GroupSortOrder = SortOrder.Descending;
 
             //besides grouping on a property/column value, you can set a custom group:
             //grouper.SetCustomGroup<TestData>(t => t.AnInt % 10, "Mod 10");
@@ -59,7 +40,7 @@ namespace Test
             //e.Header = "[" + e.Header + "], grp: " + e.Group.GroupIndex;
             //e.DisplayValue = "Value is " + e.DisplayValue;
             //e.Summary = "contains " + e.Group.Count + " rows";
-            e.Header = "تجريب 10";
+            e.Header = "تجريب نص طويل لتحديد عرض العنوان في هذا المكان";
         }
     }
 }
