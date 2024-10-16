@@ -119,7 +119,6 @@ namespace DevDash.Controls
             return info.Rows[Index] is GroupRow;
         }
 
-
         public void CollapseExpandAll(bool collapse)
         {
             if (Groups == null) return;
@@ -137,7 +136,6 @@ namespace DevDash.Controls
         {
             info.Sort();
         }
-
 
         [DefaultValue(null)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -189,12 +187,9 @@ namespace DevDash.Controls
             public static readonly NullValue Instance = new NullValue();
         }
 
-
-
         class GroupInfo
         {
             public readonly GroupingSource Owner;
-
 
             public GroupInfo(GroupingSource Owner)
             {
@@ -207,9 +202,6 @@ namespace DevDash.Controls
             //public List<GroupRow> Groups = new List<GroupRow>();
 
             public GroupList Groups;
-
-
-
 
             void set()
             {
@@ -240,8 +232,6 @@ namespace DevDash.Controls
             }
         }
 
-
-
         GroupInfo info;
 
         GroupInfo Info
@@ -265,7 +255,6 @@ namespace DevDash.Controls
         }
 
         public event EventHandler GroupingChanged;
-
 
         internal DataGridView Grid
         {
@@ -307,7 +296,6 @@ namespace DevDash.Controls
                         OnPositionChanged(EventArgs.Empty);
                     else
                         this.Position = i;
-
 
                     if (firstrow.HasValue)
                     {
@@ -409,7 +397,6 @@ namespace DevDash.Controls
         {
             if (suspendlistchange > 0 || resetting) return;
 
-
             if (shouldreset)
             {
                 switch (e.ListChangedType)
@@ -479,10 +466,6 @@ namespace DevDash.Controls
             return res;
         }
 
-
-
-
-
         public override void ApplySort(PropertyDescriptor property, ListSortDirection sort)
         {
             if (property is PropertyWrapper)
@@ -494,7 +477,6 @@ namespace DevDash.Controls
         {
             base.ApplySort(sorts);
         }
-
 
         public override void RemoveAt(int index)
         {
@@ -529,8 +511,6 @@ namespace DevDash.Controls
             }
         }
 
-
-
         public override void Remove(object value)
         {
             if (value is GroupRow) return;
@@ -561,9 +541,7 @@ namespace DevDash.Controls
 
             RemoveAt(pos);
 
-
         }
-
 
         protected override void OnCurrentChanged(EventArgs e)
         {
@@ -607,7 +585,6 @@ namespace DevDash.Controls
                 return true;
             }
         }
-
 
         private void SyncCurrencyManagers()
         {
@@ -656,8 +633,6 @@ namespace DevDash.Controls
         {
             base.Insert(index, value);
         }
-
-
 
         public partial class PropertyWrapper : PropertyDescriptor
         {
@@ -764,7 +739,6 @@ namespace DevDash.Controls
                 return Property.ShouldSerializeValue(component);
             }
         }
-
 
         PropertyDescriptorCollection props;
 

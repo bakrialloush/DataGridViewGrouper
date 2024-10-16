@@ -17,7 +17,6 @@ namespace Test
             // DataGridViewGrouperControl and setting its DataGridView property to the grid
             // the grouper control can reuse existing DataGridViewGrouper components or creates its own (as is done here)
 
-
             //once the datagridview is set (in this case in the designer), the Grouper property can be used to set the grouping
             _grouper = new DevDash.Controls.DataGridViewGrouper(dataGridView1);
             _grouper.SetGroupOn("AString");
@@ -26,7 +25,6 @@ namespace Test
             //also valid:
             //grouper.SetGroupOn<TestData>(t => t.AString);
             //grouper.SetGroupOn(this.dataGridView1.Columns["AString"]);
-
 
             //all options available in the control (via the dropdown menu) can be set in code as well and vice versa all options in this example can be set via the control.
 
@@ -52,7 +50,6 @@ namespace Test
             //to customize the grouping display, you can attach to the DisplayGroup event:
             //grouper.DisplayGroup += grouper_DisplayGroup;
         }
-
 
         //optionally, you can customize the grouping display by subscribing to the DisplayGroup event
         void Grouper_DisplayGroup(object sender, GroupDisplayEventArgs e)

@@ -70,11 +70,8 @@ namespace DevDash
             eq = null;
         }
 
-
-
         IComparer comp;
         IEqualityComparer eq;
-
 
         public bool Descending
         {
@@ -89,7 +86,6 @@ namespace DevDash
         }
 
         int factor = 1;
-
 
         public int Compare(object x, object y)
         {
@@ -387,7 +383,6 @@ namespace DevDash
         }
     }
 
-
     public class PropertyDescriptorComparer : GenericComparer
     {
         public readonly PropertyDescriptor Prop;
@@ -404,8 +399,6 @@ namespace DevDash
         }
     }
 
-
-
     static class Parser
     {
 
@@ -416,7 +409,6 @@ namespace DevDash
             if (arr.Length == 1) return arr[0].Member.Name;
             throw new Exception("Multipe field names found for " + Field);
         }
-
 
         public static string GetFieldName<RecordType, T>(Expression<Func<RecordType, T>> Field)
         {
@@ -448,7 +440,6 @@ namespace DevDash
                         select m)
                         yield return me;
                 }
-
 
             }
         }

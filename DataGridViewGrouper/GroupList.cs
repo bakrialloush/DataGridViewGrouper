@@ -77,7 +77,6 @@ namespace DevDash.Controls
                 gr.Rows.Add(row); //not gr.Add to prevent listchanged events
             }
 
-
             if (RemoveEmpty)
             {
                 foreach (var g in allgroups)
@@ -455,7 +454,6 @@ namespace DevDash.Controls
             Owner.Source.FireDisplayGroup(e);
             return e;
         }
-
 
         protected virtual void SetDisplayInfo(GroupDisplayEventArgs e)
         {

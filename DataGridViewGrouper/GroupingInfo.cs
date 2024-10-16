@@ -82,7 +82,6 @@ namespace DevDash.Controls
         }
     }
 
-
     public abstract class GroupWrapper : GroupingInfo
     {
         public readonly GroupingInfo Grouper;
@@ -163,6 +162,5 @@ namespace DevDash.Controls
             return s.Substring(0, Letters);
         }
     }
-
 
 }
